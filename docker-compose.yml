@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  # MySQL database
+  db:
+    image: mysql:8.0
+    container_name: aura_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: fashion_ecommerce
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  # Redis cache/queues
+  redis:
+    image: redis:alpine
+    container_name: aura_redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+  # Laravel API backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: aura_backend
+    restart: always
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./backend:/var/www
+    environment:
+      DB_HOST: db
+      DB_DATABASE: fashion_ecommerce
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      REDIS_HOST: redis
+
+  # Queue Worker
+  queue-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: aura_queue_worker
+    restart: always
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./backend:/var/www
+    command: php artisan queue:work --verbose --tries=3
+    environment:
+      DB_HOST: db
+      DB_DATABASE: fashion_ecommerce
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      REDIS_HOST: redis
+
+  # Next.js Storefront Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: aura_frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      NEXT_PUBLIC_API_URL: http://backend:9000
+
+volumes:
+  db_data:
