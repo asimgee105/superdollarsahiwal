@@ -108,7 +108,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                     'FULL NAME',
                     style: TextStyle(
                       fontSize: 10,
-                      fontWeight: FontWeight.w950,
+                      fontWeight: FontWeight.w900,
                       color: Colors.black54,
                     ),
                   ),
@@ -137,7 +137,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                     'MOBILE NUMBER',
                     style: TextStyle(
                       fontSize: 10,
-                      fontWeight: FontWeight.w950,
+                      fontWeight: FontWeight.w900,
                       color: Colors.black54,
                     ),
                   ),
@@ -167,7 +167,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                     'CREATE PASSWORD',
                     style: TextStyle(
                       fontSize: 10,
-                      fontWeight: FontWeight.w950,
+                      fontWeight: FontWeight.w900,
                       color: Colors.black54,
                     ),
                   ),
@@ -197,7 +197,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                     'CONFIRM PASSWORD',
                     style: TextStyle(
                       fontSize: 10,
-                      fontWeight: FontWeight.w950,
+                      fontWeight: FontWeight.w900,
                       color: Colors.black54,
                     ),
                   ),
@@ -235,7 +235,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                     ),
                     child: Text(
                       loading ? 'SAVING PROFILE...' : 'SAVE & COMPLETE',
-                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w950, letterSpacing: 1.2),
+                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1.2),
                     ),
                   ),
 

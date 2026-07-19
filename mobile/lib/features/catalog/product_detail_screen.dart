@@ -111,7 +111,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     'AI PRODUCT INSIGHTS',
                     style: TextStyle(
                       fontSize: 12,
-                      fontWeight: FontWeight.w950,
+                      fontWeight: FontWeight.w900,
                       letterSpacing: 1.2,
                     ),
                   ),
@@ -182,13 +182,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   
                   // Brand & AI insights row
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.between,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         _mockDetails['brand']!,
                         style: const TextStyle(
                           fontSize: 10,
-                          fontWeight: FontWeight.w950,
+                          fontWeight: FontWeight.w900,
                           color: Color(0xFFFF3F6C),
                           letterSpacing: 1.5,
                         ),
@@ -238,7 +238,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     'Rs. ${_mockDetails['price'].toString()}',
                     style: const TextStyle(
                       fontSize: 18,
-                      fontWeight: FontWeight.w950,
+                      fontWeight: FontWeight.w900,
                       color: Colors.black,
                     ),
                   ),
@@ -249,7 +249,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     'SELECT SIZE',
                     style: TextStyle(
                       fontSize: 9,
-                      fontWeight: FontWeight.w950,
+                      fontWeight: FontWeight.w900,
                       color: Colors.grey,
                       letterSpacing: 1.0,
                     ),
@@ -293,7 +293,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     'PRODUCT DESCRIPTION',
                     style: TextStyle(
                       fontSize: 9,
-                      fontWeight: FontWeight.w950,
+                      fontWeight: FontWeight.w900,
                       color: Colors.grey,
                       letterSpacing: 1.0,
                     ),
@@ -361,7 +361,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     SizedBox(width: 8),
                     Text(
                       'ADD TO BAG',
-                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w950, letterSpacing: 1.0),
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1.0),
                     )
                   ],
                 ),

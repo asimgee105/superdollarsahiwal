@@ -35,7 +35,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               title: const Text(
                 'ORDER PLACED!',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontWeight: FontWeight.w950, fontSize: 16, letterSpacing: 1.0),
+                style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 1.0),
               ),
               content: const Column(
                 mainAxisSize: MainAxisSize.min,
@@ -61,7 +61,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
-                    child: const Text('VIEW ORDERS', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w950)),
+                    child: const Text('VIEW ORDERS', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900)),
                   ),
                 )
               ],
@@ -92,7 +92,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   SizedBox(height: 16),
                   Text(
                     'PLACING YOUR ORDER...',
-                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.w950, letterSpacing: 1.0, color: Colors.grey),
+                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.0, color: Colors.grey),
                   ),
                 ],
               ),
@@ -106,7 +106,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   // Address Section
                   const Text(
                     'DELIVERY ADDRESS',
-                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.w950, color: Colors.grey, letterSpacing: 1.0),
+                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.grey, letterSpacing: 1.0),
                   ),
                   const SizedBox(height: 12),
                   
@@ -180,7 +180,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   // Payment Section
                   const Text(
                     'PAYMENT METHOD',
-                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.w950, color: Colors.grey, letterSpacing: 1.0),
+                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.grey, letterSpacing: 1.0),
                   ),
                   const SizedBox(height: 12),
 
@@ -219,7 +219,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 18),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: const Text('PLACE ORDER', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w950, letterSpacing: 1.2)),
+                    child: const Text('PLACE ORDER', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 1.2)),
                   ),
 
                 ],

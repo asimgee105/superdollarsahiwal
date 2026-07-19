@@ -65,12 +65,12 @@ class OrdersScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(12),
                   color: Colors.grey.shade50,
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.between,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('ORDER ${order['id']}', style: const TextStyle(fontWeight: FontWeight.w950, fontSize: 10, letterSpacing: 0.5)),
+                          Text('ORDER ${order['id']}', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 10, letterSpacing: 0.5)),
                           const SizedBox(height: 2),
                           Text('Placed: ${order['date']}', style: const TextStyle(color: Colors.grey, fontSize: 9, fontWeight: FontWeight.bold)),
                         ],
@@ -116,7 +116,7 @@ class OrdersScreen extends StatelessWidget {
                               children: [
                                 Text(
                                   item['brand']!,
-                                  style: const TextStyle(fontSize: 7, fontWeight: FontWeight.w950, color: Color(0xFFFF3F6C)),
+                                  style: const TextStyle(fontSize: 7, fontWeight: FontWeight.w900, color: Color(0xFFFF3F6C)),
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
@@ -143,7 +143,7 @@ class OrdersScreen extends StatelessWidget {
                     border: Border(top: BorderSide(color: Colors.grey.shade100)),
                   ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.between,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         'Total Paid: Rs. ${order['total']}',

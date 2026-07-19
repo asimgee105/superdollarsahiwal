@@ -71,7 +71,7 @@ class _GiftCardsScreenState extends State<GiftCardsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('AURA GIFT CARD', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w950, fontSize: 14, letterSpacing: 1.0)),
+                  Text('AURA GIFT CARD', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 14, letterSpacing: 1.0)),
                   SizedBox(height: 6),
                   Text('Share the joy of style. The perfect gift voucher for birthdays, anniversaries, or appreciation tokens.', style: TextStyle(color: Colors.white70, fontSize: 10, height: 1.4)),
                 ],
@@ -90,7 +90,7 @@ class _GiftCardsScreenState extends State<GiftCardsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text('CHECK CARD BALANCE', style: TextStyle(fontWeight: FontWeight.w950, fontSize: 10, color: Colors.grey, letterSpacing: 0.5)),
+                  const Text('CHECK CARD BALANCE', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 10, color: Colors.grey, letterSpacing: 0.5)),
                   const SizedBox(height: 16),
                   
                   TextField(
@@ -126,7 +126,7 @@ class _GiftCardsScreenState extends State<GiftCardsScreen> {
                     ),
                     child: Text(
                       _loading ? 'FETCHING...' : 'CHECK BALANCE',
-                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w950),
+                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900),
                     ),
                   )
                 ],
@@ -146,7 +146,7 @@ class _GiftCardsScreenState extends State<GiftCardsScreen> {
                   children: [
                     const Text('AVAILABLE CARD BALANCE', style: TextStyle(color: Colors.green, fontSize: 9, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 4),
-                    Text('Rs. ${_retrievedBalance.toStringAsFixed(0)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w950, color: Colors.green)),
+                    Text('Rs. ${_retrievedBalance.toStringAsFixed(0)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.green)),
                   ],
                 ),
               )

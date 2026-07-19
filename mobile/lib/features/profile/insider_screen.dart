@@ -39,10 +39,10 @@ class InsiderScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(color: const Color(0xFFFF3F6C).withOpacity(0.3)),
                     ),
-                    child: const Text('LOYALTY MEMEBER', style: TextStyle(color: Color(0xFFFF3F6C), fontSize: 8, fontWeight: FontWeight.w950)),
+                    child: const Text('LOYALTY MEMEBER', style: TextStyle(color: Color(0xFFFF3F6C), fontSize: 8, fontWeight: FontWeight.w900)),
                   ),
                   const SizedBox(height: 12),
-                  const Text('450 INSIDER POINTS', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w950, fontSize: 18, letterSpacing: 0.5)),
+                  const Text('450 INSIDER POINTS', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 18, letterSpacing: 0.5)),
                   const SizedBox(height: 4),
                   const Text('Exchange points for flat discounts and priority early deliveries.', style: TextStyle(color: Colors.grey, fontSize: 10, height: 1.4)),
                 ],
@@ -51,7 +51,7 @@ class InsiderScreen extends StatelessWidget {
             const SizedBox(height: 24),
 
             // Rewards selection
-            const Text('AVAILABLE POINT EXCHANGES', style: TextStyle(fontWeight: FontWeight.w950, fontSize: 10, color: Colors.grey, letterSpacing: 0.5)),
+            const Text('AVAILABLE POINT EXCHANGES', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 10, color: Colors.grey, letterSpacing: 0.5)),
             const SizedBox(height: 12),
 
             Container(

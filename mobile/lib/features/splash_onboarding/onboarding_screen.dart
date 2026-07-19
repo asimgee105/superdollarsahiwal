@@ -79,7 +79,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                   letterSpacing: 1.5,
                                   color: Colors.black,
                                 ),
-                                textAlign: Alignment.centerLeft,
+                                textAlign: TextAlign.left,
                               ),
                               const SizedBox(height: 12),
                               Text(

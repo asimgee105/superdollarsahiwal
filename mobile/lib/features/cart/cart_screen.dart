@@ -154,7 +154,7 @@ class _CartScreenState extends State<CartScreen> {
                                   item['brand'] ?? '',
                                   style: const TextStyle(
                                     fontSize: 8,
-                                    fontWeight: FontWeight.w950,
+                                    fontWeight: FontWeight.w900,
                                     color: Color(0xFFFF3F6C),
                                     letterSpacing: 1.0,
                                   ),
@@ -281,7 +281,7 @@ class _CartScreenState extends State<CartScreen> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.between,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
                               'Coupon $_activeCoupon Active',
@@ -301,7 +301,7 @@ class _CartScreenState extends State<CartScreen> {
 
                     // Price Breakdown
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.between,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text('Bag Total', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey)),
                         Text('Rs. ${subtotal.toStringAsFixed(0)}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w900)),
@@ -310,7 +310,7 @@ class _CartScreenState extends State<CartScreen> {
                     const SizedBox(height: 6),
                     if (discountAmount > 0) ...[
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.between,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('Discount Amount', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey)),
                           Text('- Rs. ${discountAmount.toStringAsFixed(0)}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Color(0xFFFF3F6C))),
@@ -319,7 +319,7 @@ class _CartScreenState extends State<CartScreen> {
                       const SizedBox(height: 6),
                     ],
                     const Row(
-                      mainAxisAlignment: MainAxisAlignment.between,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text('Shipping Charge', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey)),
                         Text('Rs. 150', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900)),
@@ -327,10 +327,10 @@ class _CartScreenState extends State<CartScreen> {
                     ),
                     const Divider(height: 24),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.between,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Order Total', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w950)),
-                        Text('Rs. ${total.toStringAsFixed(0)}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w950, color: Color(0xFFFF3F6C))),
+                        const Text('Order Total', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900)),
+                        Text('Rs. ${total.toStringAsFixed(0)}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFFFF3F6C))),
                       ],
                     ),
                     const SizedBox(height: 18),
@@ -343,7 +343,7 @@ class _CartScreenState extends State<CartScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: const Text('PROCEED TO CHECKOUT', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w950)),
+                      child: const Text('PROCEED TO CHECKOUT', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900)),
                     )
 
                   ],

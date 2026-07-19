@@ -62,7 +62,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: const Center(
                       child: Text(
                         'AG',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w950, color: Color(0xFFFF3F6C)),
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Color(0xFFFF3F6C)),
                       ),
                     ),
                   ),

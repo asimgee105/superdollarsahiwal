@@ -171,7 +171,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 18,
-                        fontWeight: FontWeight.w950,
+                        fontWeight: FontWeight.w900,
                         letterSpacing: 1.0,
                       ),
                     ),
@@ -194,7 +194,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.between,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     'TRENDING PRODUCTS',
@@ -262,7 +262,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 prod['brand']!,
                                 style: const TextStyle(
                                   fontSize: 8,
-                                  fontWeight: FontWeight.w950,
+                                  fontWeight: FontWeight.w900,
                                   color: Color(0xFFFF3F6C),
                                   letterSpacing: 1.0,
                                 ),

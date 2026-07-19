@@ -213,7 +213,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     'EMAIL ADDRESS',
                     style: TextStyle(
                       fontSize: 10,
-                      fontWeight: FontWeight.w950,
+                      fontWeight: FontWeight.w900,
                       color: Colors.black54,
                     ),
                   ),
@@ -248,7 +248,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       'PASSWORD',
                       style: TextStyle(
                         fontSize: 10,
-                        fontWeight: FontWeight.w950,
+                        fontWeight: FontWeight.w900,
                         color: Colors.black54,
                       ),
                     ),
@@ -280,7 +280,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       'VERIFICATION CODE',
                       style: TextStyle(
                         fontSize: 10,
-                        fontWeight: FontWeight.w950,
+                        fontWeight: FontWeight.w900,
                         color: Colors.black54,
                       ),
                     ),
@@ -325,7 +325,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           : (_isOtpMode
                               ? (_isOtpCodeSent ? 'VERIFY & CONTINUE' : 'SEND OTP CODE')
                               : 'LOGIN'),
-                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w950, letterSpacing: 1.2),
+                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1.2),
                     ),
                   ),
 

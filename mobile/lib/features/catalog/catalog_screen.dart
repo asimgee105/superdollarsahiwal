@@ -122,13 +122,13 @@ class _CatalogScreenState extends State<CatalogScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.between,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   '${_filteredProducts.length} Items Found',
                   style: const TextStyle(
                     fontSize: 10,
-                    fontWeight: FontWeight.w950,
+                    fontWeight: FontWeight.w900,
                     color: Colors.grey,
                   ),
                 ),
@@ -210,7 +210,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
                                       prod['brand']!,
                                       style: const TextStyle(
                                         fontSize: 8,
-                                        fontWeight: FontWeight.w950,
+                                        fontWeight: FontWeight.w900,
                                         color: Color(0xFFFF3F6C),
                                         letterSpacing: 1.0,
                                       ),
