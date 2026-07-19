@@ -53,7 +53,7 @@ class DeveloperTools extends Page
         }
 
         // Keep admin and manager users, delete customer users
-        $adminEmails = ['admin@superdollarsahiwal.com', 'admin1@example.com', 'admin2@example.com'];
+        $adminEmails = ['admin@aura.com', 'admin@superdollarsahiwal.com', 'admin1@example.com', 'admin2@example.com'];
         $customerUserIds = \Illuminate\Support\Facades\DB::table('users')
             ->whereNotIn('email', $adminEmails)
             ->where('email', 'not like', 'manager%@example.com')

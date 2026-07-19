@@ -1,26 +1,19 @@
 "use client";
-
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { getRelativePath } from "@/lib/utils";
 
+// ─── Types ────────────────────────────────────────────────────────────────────
 interface Section {
   id: number;
   key: string;
   title: string;
   subtitle: string | null;
   description: string | null;
-  background: {
-    type: string;
-    color: string | null;
-    image: string | null;
-    video: string | null;
-  };
+  background: { type: string; color: string | null };
   padding: string | null;
-  margin: string | null;
   width: string;
-  animation: string | null;
   button_text: string | null;
   button_url: string | null;
   layout_variation: string;
@@ -28,423 +21,714 @@ interface Section {
   show_on_desktop: boolean;
   settings: any;
 }
+interface Product {
+  id: number;
+  title: string;
+  slug: string;
+  media?: { path: string }[];
+  variants?: { price: number; sale_price: number | null }[];
+  label?: { name: string; bg_color: string; text_color: string };
+}
+interface SlideImg { url?: string }
+interface Slide {
+  design: string; active: boolean; label?: string;
+  height?: string; width?: string; bg?: string;
+  title?: string; subtitle?: string; price?: string;
+  logoText?: string; logoColor?: string;
+  btnLabel?: string; btnUrl?: string;
+  images?: (SlideImg | string)[];
+}
 
+// ─── Design Presets for hero slider ─────────────────────────────────────────
+const PRESETS: Record<string, { bg: string; logoColor: string; dark?: boolean }> = {
+  classic_gradient: { bg: "from-[#fae04b] via-[#fbd83b] to-[#fae66d]",  logoColor: "text-zinc-950" },
+  rose_pink:        { bg: "from-[#ffd6e7] via-[#ffafd1] to-[#ff85bb]",  logoColor: "text-[#c2185b]" },
+  dark_night:       { bg: "from-[#1a1a2e] via-[#16213e]  to-[#0f3460]", logoColor: "text-[#e94560]", dark: true },
+  mint_sports:      { bg: "from-[#d4fc79] via-[#96e6a1]  to-[#43e97b]", logoColor: "text-[#1b5e20]" },
+  custom:           { bg: "from-zinc-100 to-zinc-200",                   logoColor: "text-zinc-400" },
+};
+function imgSrc(img: SlideImg | string): string {
+  return typeof img === "string" ? img : (img?.url ?? "");
+}
+function getPrice(p: Product): number {
+  return p.variants?.[0]?.sale_price ?? p.variants?.[0]?.price ?? 0;
+}
+function getOrigPrice(p: Product): number | null {
+  const v = p.variants?.[0];
+  return v?.sale_price ? v.price : null;
+}
+function getImg(p: Product): string {
+  return p.media?.[0]?.path ?? "https://placehold.co/300x400/f1f5f9/94a3b8?text=No+Image";
+}
+
+// ─── Product Card ────────────────────────────────────────────────────────────
+function ProductCard({ p }: { p: Product }) {
+  const price     = getPrice(p);
+  const origPrice = getOrigPrice(p);
+  const img       = getImg(p);
+  const discount  = origPrice ? Math.round(((origPrice - price) / origPrice) * 100) : 0;
+  return (
+    <Link href={getRelativePath(`/product/${p.slug}`)}
+      className="group bg-white border border-zinc-100 hover:shadow-md transition-shadow duration-300 flex flex-col overflow-hidden">
+      <div className="relative aspect-[3/4] bg-zinc-50 overflow-hidden">
+        <Image src={img} alt={p.title} fill sizes="(max-width:768px) 50vw,25vw"
+          className="object-cover transition-transform duration-500 group-hover:scale-105" />
+        {p.label && (
+          <span className="absolute top-2 left-2 text-[9px] font-black uppercase px-2 py-0.5 rounded-sm"
+            style={{ background: p.label.bg_color, color: p.label.text_color }}>
+            {p.label.name}
+          </span>
+        )}
+        {discount >= 5 && (
+          <span className="absolute top-2 right-2 text-[9px] font-black bg-[#ff3f6c] text-white px-2 py-0.5 rounded-sm">
+            -{discount}%
+          </span>
+        )}
+      </div>
+      <div className="p-3 flex flex-col gap-1">
+        <h3 className="text-xs font-bold text-zinc-800 line-clamp-2 leading-snug">{p.title}</h3>
+        <div className="flex items-center gap-2 mt-1">
+          <span className="text-sm font-black text-zinc-900">Rs {price.toLocaleString()}</span>
+          {origPrice && <span className="text-xs text-zinc-400 line-through">Rs {origPrice.toLocaleString()}</span>}
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+// ─── Section Heading ─────────────────────────────────────────────────────────
+function SectionHead({ title, subtitle, btnText, btnUrl, dark }: {
+  title: string; subtitle?: string | null;
+  btnText?: string | null; btnUrl?: string | null; dark?: boolean;
+}) {
+  return (
+    <div className="flex items-end justify-between mb-7">
+      <div>
+        <h2 className={`font-heading text-lg sm:text-xl font-black uppercase tracking-widest border-b-2 border-[#f51c50] pb-1.5 inline-block ${dark ? "text-white" : "text-zinc-900"}`}>
+          {title}
+        </h2>
+        {subtitle && <p className={`text-sm mt-1.5 font-medium ${dark ? "text-zinc-400" : "text-zinc-500"}`}>{subtitle}</p>}
+      </div>
+      {btnText && btnUrl && (
+        <Link href={getRelativePath(btnUrl)}
+          className={`text-[11px] font-black uppercase tracking-wider border px-4 py-1.5 hover:bg-[#ff3f6c] hover:text-white hover:border-[#ff3f6c] transition-colors ${dark ? "border-zinc-600 text-zinc-300" : "border-zinc-300 text-zinc-700"}`}>
+          {btnText}
+        </Link>
+      )}
+    </div>
+  );
+}
+
+// ─── Countdown Timer ─────────────────────────────────────────────────────────
+function Countdown({ endTime }: { endTime: string }) {
+  const calc = () => {
+    const diff = Math.max(0, new Date(endTime).getTime() - Date.now());
+    return {
+      h: Math.floor(diff / 3600000),
+      m: Math.floor((diff % 3600000) / 60000),
+      s: Math.floor((diff % 60000) / 1000),
+    };
+  };
+  const [t, setT] = React.useState(calc);
+  React.useEffect(() => { const i = setInterval(() => setT(calc()), 1000); return () => clearInterval(i); });
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return (
+    <div className="flex items-center gap-2">
+      {[["h", t.h], ["m", t.m], ["s", t.s]].map(([label, val]) => (
+        <div key={String(label)} className="flex flex-col items-center">
+          <span className="bg-[#ff3f6c] text-white font-black text-lg sm:text-2xl w-12 sm:w-14 h-10 sm:h-12 flex items-center justify-center rounded">{pad(Number(val))}</span>
+          <span className="text-[9px] font-bold text-zinc-500 uppercase mt-0.5">{label}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── Main Page ───────────────────────────────────────────────────────────────
 export default function Home() {
-  const [sections, setSections] = React.useState<Section[]>([]);
-  const [layoutInfo, setLayoutInfo] = React.useState<any>(null);
-  const [currentSlide, setCurrentSlide] = React.useState(0);
-  const [cardSlide, setCardSlide] = React.useState(0);
+  const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
-  // Mouse Drag / Touch Swipe states
-  const [dragStart, setDragStart] = React.useState<number | null>(null);
-  const [dragOffset, setDragOffset] = React.useState(0);
+  const [sections, setSections]           = React.useState<Section[]>([]);
+  const [currentSlide, setCurrentSlide]   = React.useState(0);
+  const [cardSlide, setCardSlide]         = React.useState(0);
+  const [brandIdx, setBrandIdx]           = React.useState(0);
+  const [testimonialIdx, setTestimonialIdx] = React.useState(0);
+  const [dragStart, setDragStart]         = React.useState<number | null>(null);
+  const [dragOffset, setDragOffset]       = React.useState(0);
+  const [products, setProducts]           = React.useState<Record<string, Product[]>>({});
+  const [testimonials, setTestimonials]   = React.useState<any[]>([]);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
-  // Fetch Homepage Layout and Section configs
+  // ── Fetch sections ───────────────────────────────────────────────────────
   React.useEffect(() => {
-    // 1. Fetch Dynamic Theme Styling colors
-    fetch(`${API_URL}/api/v1/theme`)
-      .then((res) => {
-        if (!res.ok) throw new Error();
-        return res.json();
-      })
-      .then((data) => {
-        if (data.colors) {
-          const root = document.documentElement;
-          root.style.setProperty("--primary-color", data.colors.primary);
-          root.style.setProperty("--secondary-color", data.colors.secondary);
-        }
-      })
-      .catch(() => {
-        // Fallback styling if API is not yet loaded
-        const root = document.documentElement;
-        root.style.setProperty("--primary-color", "#ff3f6c");
-        root.style.setProperty("--secondary-color", "#1a1a1a");
-      });
+    fetch(`${API}/api/v1/homepage`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d?.sections) setSections(d.sections); })
+      .catch(() => {});
+  }, [API]);
 
-    // 2. Fetch Homepage Sections Builder
-    fetch(`${API_URL}/api/v1/homepage`)
-      .then((res) => {
-        if (!res.ok) throw new Error();
-        return res.json();
-      })
-      .then((data) => {
-        setLayoutInfo(data);
-        if (data.sections) {
-          setSections(data.sections);
-        }
-      })
-      .catch(() => {
-        // Fallback local structures if API server is offline
-        setSections([
-          {
-            id: 1,
-            key: "hero_slider",
-            title: "Fallback Slider",
-            subtitle: null,
-            description: null,
-            background: { type: "color", color: null, image: null, video: null },
-            padding: null,
-            margin: null,
-            width: "full",
-            animation: null,
-            button_text: null,
-            button_url: null,
-            layout_variation: "default",
-            show_on_mobile: true,
-            show_on_desktop: true,
-            settings: {
-              slides: [
-                {
-                  bg: "from-[#fae04b] via-[#fbd83b] to-[#fae66d]",
-                  logoText: "fwd",
-                  logoColor: "text-zinc-950",
-                  title: "Gen-Z Fashion For All",
-                  subtitle: "UNDER",
-                  price: "Rs 999",
-                  btnLabel: "SHOP NOW >",
-                  images: [
-                    "https://images.unsplash.com/photo-1617137968427-85924c800a22?q=80&w=400&auto=format&fit=crop",
-                    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400&auto=format&fit=crop"
-                  ]
-                }
-              ]
-            }
-          }
-        ]);
-      });
-  }, [API_URL]);
+  // ── Fetch products for product-grid sections + testimonials ──────────────
+  React.useEffect(() => {
+    if (!sections.length) return;
+    const productSections = ["featured_products","trending_products","best_sellers","new_arrivals","flash_sale"];
+    const fetched: Record<string, Product[]> = {};
 
-  // Timers for Hero slide animations
-  const activeHeroSection = sections.find((s) => s.key === "hero_slider");
-  const slidesCount = activeHeroSection?.settings?.slides?.length || 1;
+    Promise.all(
+      sections
+        .filter(s => productSections.includes(s.key) && s.settings?.api_url)
+        .map(s =>
+          fetch(`${API}${s.settings.api_url}`)
+            .then(r => r.ok ? r.json() : null)
+            .then(d => { if (d?.products) fetched[s.key] = d.products.slice(0, s.settings?.limit ?? 8); })
+            .catch(() => {})
+        )
+    ).then(() => setProducts(fetched));
+
+    // testimonials
+    const tSec = sections.find(s => s.key === "testimonials");
+    if (tSec?.settings?.api_url) {
+      fetch(`${API}${tSec.settings.api_url}`)
+        .then(r => r.ok ? r.json() : null)
+        .then(d => { if (Array.isArray(d)) setTestimonials(d); })
+        .catch(() => {});
+    }
+  }, [sections, API]);
+
+  // ── Hero slider autoplay ─────────────────────────────────────────────────
+  const heroSec       = sections.find(s => s.key === "hero_slider");
+  const allSlides     = (heroSec?.settings?.slides ?? []) as Slide[];
+  const activeSlides  = allSlides.filter(s => s.active !== false);
+  const slidesCount   = activeSlides.length;
+  const autoplay      = heroSec?.settings?.autoplay !== false;
+  const autoplayDelay = Number(heroSec?.settings?.autoplay_delay ?? 4500);
 
   React.useEffect(() => {
-    if (slidesCount <= 1) return;
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slidesCount);
-    }, 4500);
-    return () => clearInterval(timer);
-  }, [slidesCount]);
+    if (!autoplay || slidesCount <= 1) return;
+    const t = setInterval(() => setCurrentSlide(p => (p + 1) % slidesCount), autoplayDelay);
+    return () => clearInterval(t);
+  }, [slidesCount, autoplay, autoplayDelay]);
 
-  // Timers for Bank Card rotation animations
-  const activeBankSection = sections.find((s) => s.key === "bank_offers");
-  const offersCount = activeBankSection?.settings?.offers?.length || 1;
-
+  // ── Bank offers rotation ─────────────────────────────────────────────────
+  const bankSec      = sections.find(s => s.key === "bank_offers");
+  const offersCount  = bankSec?.settings?.offers?.length ?? 0;
   React.useEffect(() => {
     if (offersCount <= 1) return;
-    const cardTimer = setInterval(() => {
-      setCardSlide((prev) => (prev + 1) % offersCount);
-    }, 2000);
-    return () => clearInterval(cardTimer);
+    const t = setInterval(() => setCardSlide(p => (p + 1) % offersCount), 3000);
+    return () => clearInterval(t);
   }, [offersCount]);
 
-  // Swiping controls
-  const handleDragStart = (clientX: number) => {
-    setDragStart(clientX);
-  };
+  // ── Brand carousel rotation ──────────────────────────────────────────────
+  const brandSec    = sections.find(s => s.key === "brand_carousel");
+  const brandsCount = brandSec?.settings?.brands?.length ?? 0;
+  React.useEffect(() => {
+    if (brandsCount <= 4) return;
+    const t = setInterval(() => setBrandIdx(p => (p + 1) % brandsCount), 2500);
+    return () => clearInterval(t);
+  }, [brandsCount]);
 
-  const handleDragMove = (clientX: number) => {
+  // ── Testimonial rotation ─────────────────────────────────────────────────
+  React.useEffect(() => {
+    if (testimonials.length <= 1) return;
+    const t = setInterval(() => setTestimonialIdx(p => (p + 1) % testimonials.length), 4000);
+    return () => clearInterval(t);
+  }, [testimonials.length]);
+
+  // ── Drag/swipe ───────────────────────────────────────────────────────────
+  const onDragStart = (x: number) => setDragStart(x);
+  const onDragMove  = (x: number) => { if (dragStart !== null) setDragOffset(x - dragStart); };
+  const onDragEnd   = () => {
     if (dragStart === null) return;
-    setDragOffset(clientX - dragStart);
+    if (dragOffset > 50)  setCurrentSlide(p => (p - 1 + slidesCount) % slidesCount);
+    if (dragOffset < -50) setCurrentSlide(p => (p + 1) % slidesCount);
+    setDragStart(null); setDragOffset(0);
   };
 
-  const handleDragEnd = () => {
-    if (dragStart === null) return;
-    if (dragOffset > 50) {
-      setCurrentSlide((prev) => (prev - 1 + slidesCount) % slidesCount);
-    } else if (dragOffset < -50) {
-      setCurrentSlide((prev) => (prev + 1) % slidesCount);
-    }
-    setDragStart(null);
-    setDragOffset(0);
-  };
+  const sliderH = heroSec?.settings?.slider_height ?? "420px";
+  const sliderW = heroSec?.settings?.slider_width  ?? "100%";
 
+  // ── Render ───────────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col min-h-screen bg-zinc-50/50">
-      
-      {/* Dynamic Announcement Line Banner */}
-      <section className="w-full bg-[#f51c50] py-6 px-4 text-center text-white font-heading font-extrabold tracking-widest text-sm sm:text-base md:text-lg flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6 shadow-sm select-none">
-        <span>FLAT Rs. 500 OFF + FREE SHIPPING ON YOUR FIRST ORDER</span>
+    <div className="flex flex-col min-h-screen bg-zinc-50/40">
+
+      {/* Announcement Bar */}
+      <div className="w-full bg-[#f51c50] py-2.5 px-4 text-center text-white font-black tracking-widest text-[11px] sm:text-xs flex items-center justify-center gap-4 select-none">
+        <span>FLAT Rs. 500 OFF + FREE SHIPPING ON ORDERS ABOVE Rs. 2000</span>
         <Link href={getRelativePath("/register")}>
-          <span className="bg-white text-[#f51c50] text-[10px] sm:text-xs font-black uppercase px-4 py-1.5 rounded-sm shadow-sm hover:opacity-95 transition-opacity inline-block cursor-pointer">
-            USE CODE: AURA50
+          <span className="bg-white text-[#f51c50] text-[10px] font-black uppercase px-3 py-1 rounded-sm cursor-pointer hover:opacity-90 transition-opacity">
+            USE CODE: AURA500
           </span>
         </Link>
-      </section>
+      </div>
 
-      {/* Ticket Stub Promo Coupon Banner */}
-      <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8 w-full select-none">
-        <div className="relative bg-gradient-to-r from-[#ffebe0] to-[#ffdcd0] border border-[#ffcdb3] rounded-xl py-5 px-6 sm:px-10 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm overflow-hidden">
-          <div className="absolute top-1/2 -left-3.5 w-7 h-7 bg-[#fdf2f4] rounded-full -translate-y-1/2 border-r border-[#ffcdb3] z-10"></div>
-          <div className="absolute top-1/2 -right-3.5 w-7 h-7 bg-[#fdf2f4] rounded-full -translate-y-1/2 border-l border-[#ffcdb3] z-10"></div>
-          
-          <div className="flex flex-col text-center md:text-left gap-1 z-10">
-            <h2 className="text-2xl sm:text-3xl font-black text-[#ff3f6c] tracking-wide">
-              <span className="text-[#ff5d24]">Get 25% Off</span>
-            </h2>
-            <p className="text-sm sm:text-base text-zinc-700 font-extrabold tracking-wide">
-              Up To Rs 200 Off*
-            </p>
+      {/* Coupon Strip */}
+      <div className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 pt-5">
+        <div className="relative bg-gradient-to-r from-[#ffebe0] to-[#ffdcd0] border border-[#ffcdb3] rounded-xl py-3.5 px-6 sm:px-10 flex flex-col md:flex-row items-center justify-between gap-3 overflow-hidden shadow-sm">
+          <div className="absolute -left-3.5 top-1/2 -translate-y-1/2 w-7 h-7 bg-zinc-50/80 rounded-full border-r border-[#ffcdb3]" />
+          <div className="absolute -right-3.5 top-1/2 -translate-y-1/2 w-7 h-7 bg-zinc-50/80 rounded-full border-l border-[#ffcdb3]" />
+          <div className="text-center md:text-left">
+            <div className="text-2xl font-black text-[#ff5d24]">Get 25% Off</div>
+            <div className="text-xs font-extrabold text-zinc-600 tracking-wide">Up To Rs 200 Off · First Order</div>
           </div>
-
-          <div className="flex flex-col items-center gap-2 z-10">
-            <div className="bg-white border border-[#ffbca0] rounded-lg px-6 py-2.5 flex items-center gap-3 shadow-xs">
-              <div className="flex flex-col text-center">
-                <span className="text-[9px] font-black uppercase text-zinc-400 leading-none">COUPON</span>
-                <span className="text-[10px] font-black uppercase text-zinc-400 leading-none mt-0.5">CODE</span>
-              </div>
-              <span className="text-lg font-black text-zinc-800 tracking-wider">
-                MYNTRASAVE
-              </span>
+          <div className="flex flex-col items-center gap-1">
+            <div className="bg-white border border-[#ffbca0] rounded-lg px-5 py-2 flex items-center gap-3 shadow-sm">
+              <div className="text-[9px] font-black uppercase text-zinc-400 leading-tight">COUPON<br/>CODE</div>
+              <span className="text-lg font-black text-zinc-800 tracking-wider">AURA25</span>
             </div>
-            <span className="text-[10px] text-zinc-500 font-bold tracking-wide">
-              On Your First Order | T&C Apply
-            </span>
-          </div>
-
-          <div className="hidden md:flex items-center justify-center w-14 h-14 bg-white/40 rounded-full border border-[#ffa880]/30 z-10">
-            <span className="text-2xl font-black text-[#ff5d24]">%</span>
+            <span className="text-[10px] text-zinc-500 font-bold">On Your First Order · T&amp;C Apply</span>
           </div>
         </div>
       </div>
 
-      {/* Dynamic Sections Engine */}
-      {sections.map((section) => {
-        // Mobile / Desktop visibility rules
-        const visibilityClass = `
-          ${!section.show_on_mobile ? "hidden md:block" : ""}
-          ${!section.show_on_desktop ? "block md:hidden" : ""}
-        `.trim();
+      {/* ── Section Loop ─────────────────────────────────────────────────── */}
+      {sections.map(section => {
+        const vis = [
+          !section.show_on_mobile  ? "hidden md:block" : "",
+          !section.show_on_desktop ? "md:hidden" : "",
+        ].filter(Boolean).join(" ");
+        const wrap = section.width === "full"
+          ? `w-full ${section.padding ?? "py-10"} ${vis}`
+          : `mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 ${section.padding ?? "py-10"} ${vis}`;
 
-        // 1. Render Hero Slider Section
+        // ══════════════════════════════════════════════════════════════════
+        // 1. HERO SLIDER
+        // ══════════════════════════════════════════════════════════════════
         if (section.key === "hero_slider") {
-          const slides = section.settings?.slides || [];
-          if (slides.length === 0) return null;
-
+          if (!activeSlides.length) return null;
           return (
-            <section key={section.id} className={`mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 w-full select-none ${visibilityClass}`}>
+            <div key={section.id} className={`w-full px-4 sm:px-6 lg:px-8 ${section.padding ?? "py-6"} ${vis}`}>
               <div
-                onMouseDown={(e) => handleDragStart(e.clientX)}
-                onMouseMove={(e) => handleDragMove(e.clientX)}
-                onMouseUp={handleDragEnd}
-                onMouseLeave={handleDragEnd}
-                onTouchStart={(e) => handleDragStart(e.touches[0].clientX)}
-                onTouchMove={(e) => handleDragMove(e.touches[0].clientX)}
-                onTouchEnd={handleDragEnd}
-                className="relative h-[250px] sm:h-[350px] md:h-[400px] w-full rounded-xl overflow-hidden shadow-md cursor-grab active:cursor-grabbing"
+                style={{ height: sliderH, width: sliderW, maxWidth: "100%" }}
+                className="relative mx-auto rounded-2xl overflow-hidden shadow-md cursor-grab active:cursor-grabbing select-none"
+                onMouseDown={e => onDragStart(e.clientX)} onMouseMove={e => onDragMove(e.clientX)}
+                onMouseUp={onDragEnd} onMouseLeave={onDragEnd}
+                onTouchStart={e => onDragStart(e.touches[0].clientX)}
+                onTouchMove={e => onDragMove(e.touches[0].clientX)} onTouchEnd={onDragEnd}
               >
-                {slides.map((slide: any, index: number) => (
-                  <div
-                    key={index}
-                    className={`absolute inset-0 bg-gradient-to-r ${slide.bg || "from-zinc-100 to-zinc-200"} flex items-center justify-between px-6 sm:px-12 md:px-20 transition-opacity duration-1000 ${
-                      currentSlide === index ? "opacity-100 z-10" : "opacity-0 z-0"
-                    }`}
-                  >
-                    {/* Floating model assets */}
-                    <div className="relative h-full w-[35%] sm:w-[45%] flex items-end pointer-events-none">
-                      {slide.images?.[0] && (
-                        <div className="absolute left-0 bottom-0 w-[70%] h-[80%] rounded-t-lg overflow-hidden border-2 border-white/20">
-                          <Image src={slide.images[0]} alt="Model" fill priority className="object-cover object-top" />
-                        </div>
-                      )}
-                      {slide.images?.[1] && (
-                        <div className="absolute left-[30%] bottom-0 w-[70%] h-[90%] rounded-t-lg overflow-hidden border-2 border-white/40 shadow-lg">
-                          <Image src={slide.images[1]} alt="Model" fill priority className="object-cover object-top" />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Styled central logo */}
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                      <span className={`text-[12vw] sm:text-[10vw] font-black italic tracking-tighter uppercase opacity-30 ${slide.logoColor || "text-zinc-500"}`}>
-                        {slide.logoText || "fwd"}
-                      </span>
-                    </div>
-
-                    {/* Text promotions */}
-                    <div className="flex flex-col items-end text-right z-20 max-w-[50%] sm:max-w-[40%]">
-                      <h2 className="text-zinc-950 font-black text-lg sm:text-3xl md:text-4xl uppercase tracking-wider leading-none">
-                        {slide.title}
-                      </h2>
-                      <div className="flex items-baseline gap-2 mt-2 sm:mt-4">
-                        <span className="text-zinc-950 font-black text-xs sm:text-base uppercase tracking-wide">
-                          {slide.subtitle || "UNDER"}
-                        </span>
-                        <span className="text-zinc-950 font-extrabold text-xl sm:text-4xl md:text-5xl tracking-wide">
-                          {slide.price}
+                {activeSlides.map((slide, i) => {
+                  const preset   = PRESETS[slide.design ?? "custom"] ?? PRESETS.custom;
+                  const bg       = slide.bg ?? preset.bg;
+                  const isDark   = preset.dark ?? false;
+                  const img0     = slide.images?.[0] ? imgSrc(slide.images[0]) : "";
+                  const img1     = slide.images?.[1] ? imgSrc(slide.images[1]) : "";
+                  return (
+                    <div key={i} className={`absolute inset-0 bg-gradient-to-r ${bg} flex items-center justify-between px-6 sm:px-16 md:px-20 transition-opacity duration-700 ${currentSlide === i ? "opacity-100 z-10" : "opacity-0 z-0"}`}>
+                      {/* Left: Model images */}
+                      <div className="relative h-full w-[38%] sm:w-[44%] flex items-end pointer-events-none">
+                        {img0 && (
+                          <div className="absolute left-0 bottom-0 w-[65%] h-[78%] rounded-t-xl overflow-hidden border-2 border-white/20 shadow-md">
+                            <Image src={img0} alt="model" fill priority className="object-cover object-top" />
+                          </div>
+                        )}
+                        {img1 && (
+                          <div className="absolute left-[28%] bottom-0 w-[72%] h-[90%] rounded-t-xl overflow-hidden border-2 border-white/40 shadow-xl">
+                            <Image src={img1} alt="model" fill priority className="object-cover object-top" />
+                          </div>
+                        )}
+                      </div>
+                      {/* Centre: watermark */}
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                        <span className={`text-[14vw] sm:text-[10vw] font-black italic tracking-tighter uppercase opacity-15 ${slide.logoColor ?? preset.logoColor}`}>
+                          {slide.logoText ?? "AURA"}
                         </span>
                       </div>
-                      <Link href={getRelativePath("/catalog/")} className="mt-4 sm:mt-6 z-30">
-                        <span className="bg-white text-zinc-950 font-black text-[10px] sm:text-xs uppercase tracking-widest px-5 py-2.5 sm:px-8 sm:py-3.5 hover:bg-zinc-100 transition-colors shadow-sm rounded-sm inline-block cursor-pointer">
-                          {slide.btnLabel || "SHOP NOW"}
-                        </span>
-                      </Link>
+                      {/* Right: content */}
+                      <div className="flex flex-col items-end text-right z-20 max-w-[48%]">
+                        <h2 className={`font-black text-lg sm:text-3xl md:text-4xl uppercase tracking-wider leading-none ${isDark ? "text-white" : "text-zinc-900"}`}>
+                          {slide.title ?? "New Collection"}
+                        </h2>
+                        <div className="flex items-baseline gap-2 mt-2 sm:mt-3">
+                          <span className={`font-bold text-xs sm:text-sm uppercase ${isDark ? "text-zinc-400" : "text-zinc-600"}`}>{slide.subtitle}</span>
+                          <span className={`font-black text-xl sm:text-4xl ${isDark ? "text-white" : "text-zinc-950"}`}>{slide.price}</span>
+                        </div>
+                        <Link href={getRelativePath(slide.btnUrl ?? "/catalog/")} className="mt-4 z-30">
+                          <span className={`inline-block font-black text-[10px] sm:text-xs uppercase tracking-widest px-5 py-2.5 shadow rounded-sm cursor-pointer transition-colors ${isDark ? "bg-[#e94560] text-white hover:bg-[#c0392b]" : "bg-white text-zinc-950 hover:bg-zinc-100"}`}>
+                            {slide.btnLabel ?? "SHOP NOW"}
+                          </span>
+                        </Link>
+                      </div>
                     </div>
+                  );
+                })}
+                {/* Arrows */}
+                {slidesCount > 1 && (<>
+                  <button onClick={() => setCurrentSlide(p => (p - 1 + slidesCount) % slidesCount)}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/70 hover:bg-white flex items-center justify-center text-zinc-800 font-bold shadow z-30 cursor-pointer">&#8592;</button>
+                  <button onClick={() => setCurrentSlide(p => (p + 1) % slidesCount)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/70 hover:bg-white flex items-center justify-center text-zinc-800 font-bold shadow z-30 cursor-pointer">&#8594;</button>
+                </>)}
+                {/* Dots */}
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-30">
+                  {activeSlides.map((_, idx) => (
+                    <button key={idx} onClick={() => setCurrentSlide(idx)}
+                      className={`h-2 rounded-full transition-all cursor-pointer ${currentSlide === idx ? "w-6 bg-[#ff3f6c]" : "w-2 bg-white/60 hover:bg-white"}`} />
+                  ))}
+                </div>
+                {/* Design label */}
+                {activeSlides[currentSlide]?.label && (
+                  <span className="absolute bottom-3 right-3 z-30 hidden sm:block text-[9px] font-bold bg-black/25 text-white px-2 py-0.5 rounded-full backdrop-blur-sm">
+                    {activeSlides[currentSlide].label}
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        }
+
+        // ══════════════════════════════════════════════════════════════════
+        // 2. BANK OFFERS
+        // ══════════════════════════════════════════════════════════════════
+        if (section.key === "bank_offers") {
+          const offers = section.settings?.offers ?? [];
+          if (!offers.length) return null;
+          return (
+            <div key={section.id} className={`mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 pb-5 ${vis}`}>
+              <div className="flex gap-1.5 justify-center mb-2">
+                {offers.map((_: any, i: number) => (
+                  <span key={i} className={`h-1.5 rounded-full transition-all ${cardSlide === i ? "w-5 bg-zinc-700" : "w-1.5 bg-zinc-200"}`} />
+                ))}
+              </div>
+              <div className="relative border border-[#d6c7ff] rounded-2xl bg-white h-20 sm:h-24 overflow-hidden shadow-sm">
+                <div className="absolute right-[12%] top-0 bottom-0 border-l border-dashed border-zinc-200 z-10" />
+                {offers.map((o: any, i: number) => (
+                  <div key={i} className={`absolute inset-0 flex items-center px-4 sm:px-8 gap-4 transition-opacity duration-500 ${cardSlide === i ? "opacity-100 z-10" : "opacity-0 z-0"}`}>
+                    <div className="w-[28%] shrink-0">
+                      {o.type === "hdfc"         && <span className="text-blue-800 font-black text-xs tracking-widest">HDFC BANK</span>}
+                      {o.type === "bob-kotak"    && <div className="flex gap-1 items-center"><span className="text-orange-600 font-extrabold text-[10px]">BOBCARD</span><span className="bg-red-600 text-white font-black text-[9px] px-1 py-0.5 rounded-sm">kotak</span></div>}
+                      {o.type === "flipkart-sbi" && <span className="text-blue-700 font-black text-[10px]">Flipkart SBI</span>}
+                      {o.type === "scb"          && <span className="text-emerald-600 font-black text-[10px]">Std. Chartered</span>}
+                    </div>
+                    <div className="flex-1 border-l border-zinc-100 pl-4">
+                      <div className="font-black text-xs sm:text-sm text-zinc-900">{o.discount}</div>
+                      <div className="text-[10px] text-zinc-400 font-semibold mt-0.5">{o.desc}</div>
+                    </div>
+                    <span className="text-[8px] font-black text-zinc-300 tracking-widest uppercase rotate-90 whitespace-nowrap w-[10%]">*T&amp;C Apply</span>
                   </div>
                 ))}
+              </div>
+            </div>
+          );
+        }
 
-                {/* Arrows */}
-                <button
-                  onClick={() => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length)}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/70 hover:bg-white text-zinc-800 flex items-center justify-center font-bold shadow-sm z-30 transition-colors cursor-pointer"
-                >
-                  &larr;
-                </button>
-                <button
-                  onClick={() => setCurrentSlide((prev) => (prev + 1) % slides.length)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/70 hover:bg-white text-zinc-800 flex items-center justify-center font-bold shadow-sm z-30 transition-colors cursor-pointer"
-                >
-                  &rarr;
-                </button>
+        // ══════════════════════════════════════════════════════════════════
+        // 3. CATEGORIES GRID
+        // ══════════════════════════════════════════════════════════════════
+        if (section.key === "categories") {
+          const cats: any[] = section.settings?.categories ?? [];
+          return (
+            <div key={section.id} className={wrap}
+              style={{ background: section.background?.color ?? undefined }}>
+              <SectionHead title={section.title} subtitle={section.subtitle}
+                btnText={section.button_text} btnUrl={section.button_url} />
+              {!cats.length ? (
+                <p className="text-center text-zinc-400 py-10 text-sm">No categories found. Run the seeder to populate data.</p>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
+                  {cats.map((cat: any, idx: number) => (
+                    <Link key={idx}
+                      href={getRelativePath(cat.url ?? `/catalog/?category=${encodeURIComponent((cat.title ?? "").toLowerCase())}`)}
+                      className="group border-[3px] border-[#ffd5bd] p-1.5 bg-white hover:border-[#ff3f6c] hover:shadow-md transition-all duration-300 flex flex-col">
+                      <div className="relative aspect-[3/4] w-full bg-zinc-100 overflow-hidden">
+                        {cat.image && (
+                          <Image src={cat.image} alt={cat.title ?? ""} fill
+                            sizes="(max-width:768px) 50vw,20vw"
+                            className="object-cover transition-transform duration-500 group-hover:scale-105" />
+                        )}
+                      </div>
+                      <div className="py-2.5 text-center">
+                        <div className="text-[12px] font-black text-zinc-800 uppercase tracking-wide">{cat.title}</div>
+                        <div className="text-[13px] font-black text-[#ff3f6c] mt-0.5 uppercase">{cat.discount}</div>
+                        <div className="text-[10px] font-bold text-zinc-400 mt-1 underline group-hover:text-[#ff3f6c] transition-colors">Shop Now</div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        }
 
-                {/* Dots */}
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-30">
-                  {slides.map((_: any, idx: number) => (
-                    <button
-                      key={idx}
-                      onClick={() => setCurrentSlide(idx)}
-                      className={`w-2.5 h-2.5 rounded-full transition-all cursor-pointer ${
-                        currentSlide === idx ? "bg-[#ff3f6c] w-6" : "bg-white/60 hover:bg-white"
-                      }`}
-                    />
+        // ══════════════════════════════════════════════════════════════════
+        // 4. BUDGET BARGAINS
+        // ══════════════════════════════════════════════════════════════════
+        if (section.key === "budget_bargains") {
+          const items: any[] = section.settings?.items ?? [];
+          return (
+            <div key={section.id} className={wrap}>
+              <SectionHead title={section.title} subtitle={section.subtitle}
+                btnText={section.button_text} btnUrl={section.button_url} />
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {items.map((item: any, i: number) => (
+                  <Link key={i} href={getRelativePath(`/catalog/?tag=${encodeURIComponent((item.title ?? "").toLowerCase())}`)}
+                    className="group relative aspect-[4/5] overflow-hidden rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                    <Image src={item.image} alt={item.title} fill sizes="(max-width:768px) 50vw,25vw"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent p-4 flex flex-col justify-end text-white">
+                      <div className="font-black text-sm uppercase tracking-wide">{item.title}</div>
+                      <div className="text-[10px] text-zinc-300 font-semibold mt-0.5">{item.tagline}</div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          );
+        }
+
+        // ══════════════════════════════════════════════════════════════════
+        // 5. PROMO BANNERS
+        // ══════════════════════════════════════════════════════════════════
+        if (section.key === "promo_banners") {
+          const banners: any[] = section.settings?.banners ?? [];
+          if (!banners.length) return null;
+          return (
+            <div key={section.id} className={wrap}>
+              <SectionHead title={section.title} subtitle={section.subtitle} />
+              <div className={`grid gap-4 ${banners.length === 1 ? "" : "md:grid-cols-2"}`}>
+                {banners.map((b: any, i: number) => (
+                  <Link key={i} href={getRelativePath(b.buttonUrl ?? "/catalog/")}
+                    className="group relative h-56 sm:h-72 overflow-hidden rounded-xl shadow hover:shadow-lg transition-shadow">
+                    <Image src={b.image} alt={b.title} fill sizes="(max-width:768px) 100vw,50vw"
+                      className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/25 to-transparent p-6 flex flex-col justify-end">
+                      <h3 className="text-white font-black text-xl sm:text-2xl uppercase">{b.title}</h3>
+                      {b.subtitle && <p className="text-zinc-300 text-sm mt-1">{b.subtitle}</p>}
+                      {b.buttonText && (
+                        <span className="mt-3 inline-block bg-white text-zinc-900 font-black text-[10px] uppercase tracking-widest px-4 py-2 rounded-sm w-fit">
+                          {b.buttonText}
+                        </span>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          );
+        }
+
+        // ══════════════════════════════════════════════════════════════════
+        // 6-9. PRODUCT GRID SECTIONS (featured / trending / best_sellers / new_arrivals)
+        // ══════════════════════════════════════════════════════════════════
+        const productSections = ["featured_products","trending_products","best_sellers","new_arrivals"];
+        if (productSections.includes(section.key)) {
+          const prods: Product[] = products[section.key] ?? [];
+          const bgStyle = section.background?.color ? { background: section.background.color } : {};
+          return (
+            <div key={section.id} className={wrap} style={bgStyle}>
+              <SectionHead title={section.title} subtitle={section.subtitle}
+                btnText={section.button_text} btnUrl={section.button_url} />
+              {!prods.length ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 animate-pulse">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="bg-zinc-100 rounded aspect-[3/4]" />
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
+                  {prods.map(p => <ProductCard key={p.id} p={p} />)}
+                </div>
+              )}
+            </div>
+          );
+        }
+
+        // ══════════════════════════════════════════════════════════════════
+        // 10. FLASH SALE
+        // ══════════════════════════════════════════════════════════════════
+        if (section.key === "flash_sale") {
+          const prods: Product[] = products["flash_sale"] ?? [];
+          const endTime: string = section.settings?.end_time ?? new Date(Date.now() + 86400000).toISOString();
+          return (
+            <div key={section.id} className={wrap} style={{ background: section.background?.color ?? "#fff1f2" }}>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-7">
+                <div className="flex-1">
+                  <h2 className="font-heading text-lg sm:text-xl font-black uppercase tracking-widest text-zinc-900 border-b-2 border-[#f51c50] pb-1.5 inline-block">
+                    ⚡ {section.title}
+                  </h2>
+                  {section.subtitle && <p className="text-sm text-zinc-500 mt-1">{section.subtitle}</p>}
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-bold text-zinc-500 uppercase tracking-wide">Ends In:</span>
+                  <Countdown endTime={endTime} />
+                </div>
+                {section.button_text && section.button_url && (
+                  <Link href={getRelativePath(section.button_url)}>
+                    <span className="text-[11px] font-black uppercase tracking-wider border border-zinc-300 px-4 py-1.5 hover:bg-[#ff3f6c] hover:text-white hover:border-[#ff3f6c] transition-colors cursor-pointer">
+                      {section.button_text}
+                    </span>
+                  </Link>
+                )}
+              </div>
+              {!prods.length ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 animate-pulse">
+                  {Array.from({ length: 4 }).map((_, i) => <div key={i} className="bg-zinc-100 rounded aspect-[3/4]" />)}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
+                  {prods.map(p => <ProductCard key={p.id} p={p} />)}
+                </div>
+              )}
+            </div>
+          );
+        }
+
+        // ══════════════════════════════════════════════════════════════════
+        // 11. BRAND CAROUSEL
+        // ══════════════════════════════════════════════════════════════════
+        if (section.key === "brand_carousel") {
+          const brands: any[] = section.settings?.brands ?? [];
+          if (!brands.length) return null;
+          const visible = brands.slice(brandIdx, brandIdx + 5).concat(brands.slice(0, Math.max(0, brandIdx + 5 - brands.length)));
+          return (
+            <div key={section.id} className={wrap}>
+              <SectionHead title={section.title} subtitle={section.subtitle} />
+              <div className="border-y border-zinc-100 py-6">
+                <div className="flex items-center justify-center gap-4 sm:gap-8 flex-wrap">
+                  {brands.map((b: any, i: number) => (
+                    <Link key={i} href={getRelativePath(b.url ?? "/catalog/")}
+                      className="group opacity-60 hover:opacity-100 transition-opacity grayscale hover:grayscale-0">
+                      <Image src={b.logo} alt={b.name} width={120} height={45}
+                        className="object-contain h-8 sm:h-10 w-auto transition-transform group-hover:scale-105" />
+                    </Link>
                   ))}
                 </div>
               </div>
-            </section>
+            </div>
           );
         }
 
-        // 2. Render Bank Offer Banner Section
-        if (section.key === "bank_offers") {
-          const offers = section.settings?.offers || [];
-          if (offers.length === 0) return null;
-
+        // ══════════════════════════════════════════════════════════════════
+        // 12. LOOKBOOK
+        // ══════════════════════════════════════════════════════════════════
+        if (section.key === "lookbook") {
+          const looks: any[] = section.settings?.looks ?? [];
+          if (!looks.length) return null;
           return (
-            <section key={section.id} className={`mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8 w-full select-none ${visibilityClass}`}>
-              <div className="flex gap-1.5 justify-center mb-3">
-                {offers.map((_: any, i: number) => (
-                  <span
-                    key={i}
-                    className={`h-1.5 rounded-full transition-all duration-300 ${
-                      cardSlide === i ? "w-4 bg-zinc-700" : "w-1.5 bg-zinc-200"
-                    }`}
-                  />
+            <div key={section.id} className={`w-full ${section.padding ?? "py-14"} ${vis}`}
+              style={{ background: section.background?.color ?? "#0f172a" }}>
+              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <SectionHead title={section.title} subtitle={section.subtitle}
+                  btnText={section.button_text} btnUrl={section.button_url} dark />
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+                  {looks.map((look: any, i: number) => (
+                    <Link key={i} href={getRelativePath(look.url ?? "/catalog/")}
+                      className="group relative aspect-[3/4] overflow-hidden rounded-xl">
+                      <Image src={look.image} alt={look.title} fill sizes="(max-width:768px) 50vw,25vw"
+                        className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-4 flex flex-col justify-end">
+                        <span className="text-[9px] font-black uppercase tracking-widest text-[#ff3f6c] bg-white/10 px-2 py-0.5 rounded-full w-fit mb-1.5">{look.tag}</span>
+                        <div className="text-white font-black text-sm uppercase leading-tight">{look.title}</div>
+                        <div className="text-zinc-400 text-[10px] font-semibold mt-1 group-hover:text-white transition-colors">Shop This Look →</div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+          );
+        }
+
+        // ══════════════════════════════════════════════════════════════════
+        // 13. TESTIMONIALS
+        // ══════════════════════════════════════════════════════════════════
+        if (section.key === "testimonials") {
+          const tList = testimonials.length ? testimonials : [
+            { customer_name: "Ayesha Khan",  customer_title: "Verified Customer",  rating: 5, comment: "Absolutely love my new outfit! The fabric quality is top-notch and delivery was super fast.", avatar_url: "https://i.pravatar.cc/100?img=1" },
+            { customer_name: "Ali Hassan",   customer_title: "Regular Shopper",    rating: 5, comment: "Best online shopping experience in Pakistan. AURA never disappoints!", avatar_url: "https://i.pravatar.cc/100?img=3" },
+            { customer_name: "Sara Ahmed",   customer_title: "Premium Member",     rating: 5, comment: "The ethnic wear collection is stunning. My sherwani arrived perfectly packed and on time.", avatar_url: "https://i.pravatar.cc/100?img=5" },
+            { customer_name: "Usman Malik",  customer_title: "Style Enthusiast",   rating: 5, comment: "Great value for money. The GenZ collection is fire! Will definitely order again.", avatar_url: "https://i.pravatar.cc/100?img=7" },
+          ];
+          return (
+            <div key={section.id} className={wrap} style={{ background: section.background?.color ?? "#fdf2f4" }}>
+              <SectionHead title={section.title} subtitle={section.subtitle} />
+              {/* Active testimonial large */}
+              <div className="flex flex-col items-center text-center mb-8 px-4">
+                {tList[testimonialIdx] && (
+                  <div className="max-w-2xl transition-all duration-500">
+                    <div className="text-3xl text-[#ff3f6c] mb-3">"</div>
+                    <p className="text-zinc-700 text-sm sm:text-base font-medium leading-relaxed italic">
+                      {tList[testimonialIdx].comment}
+                    </p>
+                    <div className="flex justify-center gap-0.5 mt-4 mb-3">
+                      {Array.from({ length: tList[testimonialIdx].rating ?? 5 }).map((_, i) => (
+                        <span key={i} className="text-yellow-400 text-lg">★</span>
+                      ))}
+                    </div>
+                    {tList[testimonialIdx].avatar_url && (
+                      <Image src={tList[testimonialIdx].avatar_url} alt={tList[testimonialIdx].customer_name}
+                        width={52} height={52} className="rounded-full mx-auto mb-2 border-2 border-[#ff3f6c]" />
+                    )}
+                    <div className="font-black text-sm text-zinc-900">{tList[testimonialIdx].customer_name}</div>
+                    <div className="text-xs text-zinc-500">{tList[testimonialIdx].customer_title}</div>
+                  </div>
+                )}
+              </div>
+              {/* Dot indicators */}
+              <div className="flex justify-center gap-2">
+                {tList.map((_: any, i: number) => (
+                  <button key={i} onClick={() => setTestimonialIdx(i)}
+                    className={`h-2 rounded-full transition-all cursor-pointer ${testimonialIdx === i ? "w-6 bg-[#ff3f6c]" : "w-2 bg-zinc-300 hover:bg-zinc-400"}`} />
                 ))}
               </div>
-
-              <div className="relative border border-[#d6c7ff] rounded-2xl bg-white overflow-hidden shadow-xs h-20 sm:h-24 w-full">
-                <div className="absolute right-[12%] sm:right-[10%] top-0 bottom-0 border-l border-dashed border-zinc-200 z-10" />
-                {offers.map((offer: any, index: number) => (
-                  <div
-                    key={index}
-                    className={`absolute inset-0 flex items-center justify-between pl-4 pr-1 sm:pl-8 sm:pr-4 transition-opacity duration-500 ${
-                      cardSlide === index ? "opacity-100 z-10" : "opacity-0 z-0"
-                    }`}
-                  >
-                    {/* Brand Logos */}
-                    <div className="flex items-center gap-3 w-[30%] sm:w-[25%]">
-                      {offer.type === "bob-kotak" && (
-                        <div className="flex items-center gap-2">
-                          <span className="text-orange-600 font-extrabold text-[10px] sm:text-xs tracking-tight uppercase leading-none">BOBCARD</span>
-                          <span className="bg-red-600 text-white font-black text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded-xs leading-none">kotak</span>
-                        </div>
-                      )}
-                      {offer.type === "flipkart-sbi" && (
-                        <div className="flex items-center gap-1.5 relative h-8 sm:h-12 w-14 sm:w-20">
-                          <div className="absolute left-0 w-8 sm:w-11 h-5 sm:h-7 bg-zinc-950 border border-zinc-800 rounded-sm shadow-xs transform -rotate-6 z-10 flex items-center justify-center text-[5px] text-white">CARD</div>
-                          <div className="absolute left-4 sm:left-6 w-8 sm:w-11 h-5 sm:h-7 bg-gradient-to-r from-blue-500 to-[#ffe100] border border-blue-400 rounded-sm shadow-xs transform rotate-6 z-20 flex items-center justify-center text-[5px] text-white font-bold">SBI</div>
-                        </div>
-                      )}
-                      {offer.type === "hdfc" && (
-                        <span className="text-blue-800 font-black text-xs sm:text-base tracking-widest leading-none">HDFC BANK</span>
-                      )}
-                      {offer.type === "scb" && (
-                        <span className="text-emerald-600 font-black text-[10px] sm:text-xs tracking-tight uppercase leading-none">Standard Chartered</span>
-                      )}
-                    </div>
-
-                    <div className="flex items-center flex-grow pl-2 sm:pl-4 border-l border-zinc-200 h-8 sm:h-12">
-                      <div className="flex flex-col text-left">
-                        <span className="text-zinc-900 font-black text-xs sm:text-base tracking-wide">{offer.discount}</span>
-                        <span className="text-zinc-400 font-bold text-[9px] sm:text-xs mt-0.5">{offer.desc}</span>
-                      </div>
-                    </div>
-
-                    <div className="w-[12%] sm:w-[10%] h-full flex items-center justify-center">
-                      <span className="text-[8px] sm:text-[9px] text-zinc-400 font-black tracking-widest uppercase transform rotate-90 leading-none whitespace-nowrap">*T&C Apply</span>
-                    </div>
+              {/* Mini cards row */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-8">
+                {tList.slice(0, 4).map((t: any, i: number) => (
+                  <div key={i} onClick={() => setTestimonialIdx(i)}
+                    className={`bg-white rounded-xl p-4 text-center cursor-pointer border-2 transition-all ${testimonialIdx === i ? "border-[#ff3f6c] shadow-md" : "border-transparent hover:border-zinc-200"}`}>
+                    {t.avatar_url && (
+                      <Image src={t.avatar_url} alt={t.customer_name} width={36} height={36}
+                        className="rounded-full mx-auto mb-2" />
+                    )}
+                    <div className="text-xs font-black text-zinc-800">{t.customer_name}</div>
+                    <div className="text-[10px] text-zinc-400">{t.customer_title}</div>
+                    <div className="text-yellow-400 text-xs mt-1">{"★".repeat(t.rating ?? 5)}</div>
                   </div>
                 ))}
               </div>
-            </section>
+            </div>
           );
         }
 
-        // 3. Render Budget Bargains Section
-        if (section.key === "budget_bargains") {
-          const items = section.settings?.items || [];
+        // ══════════════════════════════════════════════════════════════════
+        // 14. NEWSLETTER
+        // ══════════════════════════════════════════════════════════════════
+        if (section.key === "newsletter") {
+          const coupon        = section.settings?.coupon_code ?? "WELCOME300";
+          const discountText  = section.settings?.discount_text ?? "Rs 300 OFF your first order";
           return (
-            <section key={section.id} className={`mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 w-full ${visibilityClass}`}>
-              <div className="text-center mb-8">
-                <h2 className="font-heading text-lg sm:text-xl font-black uppercase tracking-widest text-foreground relative inline-block pb-2 border-b-2 border-[#f51c50]">
+            <div key={section.id} className={`w-full ${section.padding ?? "py-16"} ${vis}`}
+              style={{ background: section.background?.color ?? "#1a1a1a" }}>
+              <div className="mx-auto max-w-2xl px-4 text-center">
+                <div className="text-4xl mb-3">✉️</div>
+                <h2 className="font-heading text-xl sm:text-2xl font-black uppercase tracking-widest text-white mb-2">
                   {section.title}
                 </h2>
+                {section.subtitle && (
+                  <p className="text-zinc-400 text-sm font-medium mb-1">{section.subtitle}</p>
+                )}
+                <p className="text-[#ff3f6c] font-black text-sm mb-6">{discountText}</p>
+                <form onSubmit={e => { e.preventDefault(); }} className="flex gap-2 max-w-md mx-auto mb-4">
+                  <input type="email" placeholder="Enter your email address" required
+                    className="flex-1 px-4 py-3 bg-white/10 border border-white/20 text-white placeholder:text-zinc-500 text-sm rounded-sm focus:outline-none focus:border-[#ff3f6c] transition-colors" />
+                  <button type="submit"
+                    className="bg-[#ff3f6c] hover:bg-[#e0315a] text-white font-black text-xs uppercase tracking-widest px-5 py-3 rounded-sm transition-colors whitespace-nowrap">
+                    {section.button_text ?? "SUBSCRIBE"}
+                  </button>
+                </form>
+                <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-4 py-2">
+                  <span className="text-zinc-400 text-[10px] font-bold uppercase">Coupon:</span>
+                  <span className="text-white font-black text-sm tracking-widest">{coupon}</span>
+                </div>
+                <p className="text-zinc-600 text-[10px] mt-3">No spam. Unsubscribe anytime. T&amp;C apply.</p>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                {items.map((item: any, idx: number) => (
-                  <Link key={idx} href={getRelativePath(`/catalog/?tag=${item.title.toLowerCase()}`)} className="group relative aspect-4/5 overflow-hidden rounded-md bg-muted shadow-sm hover:shadow-md transition-shadow">
-                    <Image src={item.image} alt={item.title} fill sizes="(max-width: 768px) 50vw, 25vw" className="object-cover transition-transform duration-500 group-hover:scale-103" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent p-4 flex flex-col justify-end text-white">
-                      <h3 className="font-heading text-sm font-black tracking-wider uppercase">{item.title}</h3>
-                      <p className="text-[9px] text-zinc-300 font-semibold tracking-wide mt-0.5">{item.tagline}</p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </section>
+            </div>
           );
         }
 
-        // 4. Render Categories Section
-        if (section.key === "categories") {
-          const categories = section.settings?.categories || [];
-          return (
-            <section key={section.id} className={`mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8 w-full ${visibilityClass}`}>
-              <div className="text-center mb-8">
-                <h2 className="font-heading text-lg sm:text-xl font-black uppercase tracking-widest text-foreground relative inline-block pb-2 border-b-2 border-[#f51c50]">
-                  {section.title}
-                </h2>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-6">
-                {categories.map((cat: any, idx: number) => (
-                  <Link
-                    key={idx}
-                    href={getRelativePath(`/catalog/?category=${cat.title.toLowerCase()}`)}
-                    className="group border-[3px] border-[#ffd5bd] p-1.5 bg-white text-center flex flex-col hover:shadow-md transition-shadow duration-300"
-                  >
-                    <div className="relative aspect-[3/4] w-full bg-zinc-100 overflow-hidden">
-                      <Image src={cat.image} alt={cat.title} fill sizes="(max-width: 768px) 50vw, 16vw" className="object-cover transition-transform duration-500 group-hover:scale-103" />
-                    </div>
-                    <div className="py-2.5 flex flex-col items-center">
-                      <h3 className="text-[13px] font-black text-zinc-800 tracking-wide uppercase">{cat.title}</h3>
-                      <p className="text-[16px] font-black text-zinc-950 mt-1 uppercase">{cat.discount}</p>
-                      <span className="text-[11px] font-bold text-zinc-500 hover:text-[#ff3f6c] transition-colors mt-1 underline cursor-pointer">Shop Now</span>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          );
-        }
-
-        // 5. Default/Custom HTML block support
+        // ══════════════════════════════════════════════════════════════════
+        // CUSTOM HTML
+        // ══════════════════════════════════════════════════════════════════
         if (section.key === "custom_html") {
           return (
-            <section key={section.id} className={`mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 w-full ${visibilityClass}`}>
-              <div dangerouslySetInnerHTML={{ __html: section.settings?.html || "" }} />
-            </section>
+            <div key={section.id} className={wrap}
+              dangerouslySetInnerHTML={{ __html: section.settings?.html ?? "" }} />
           );
         }
 

@@ -10,204 +10,65 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuthStore } from "@/store/slices/authSlice";
 import { getRelativePath } from "@/lib/utils";
 import { useCartStore } from "@/store/useCartStore";
+interface MegaMenuItem {
+  title: string;
+  url: string;
+}
 
+interface MegaMenuColumn {
+  title: string;
+  url: string;
+  items: MegaMenuItem[];
+}
 // Descriptive taxonomy categories for standard pages, and price tags only for GenZ
 const megaMenuData: Record<string, { title: string; items: string[] }[]> = {
   men: [
     {
       title: "Topwear",
-      items: ["T-Shirts", "Casual Shirts", "Formal Shirts", "Sweatshirts", "Sweaters", "Jackets", "Blazers & Coats", "Suits", "Rain Jackets"],
-    },
-    {
-      title: "Bottomwear",
-      items: ["Jeans", "Casual Trousers", "Formal Trousers", "Shorts", "Track Pants & Joggers"],
+      items: ["T-Shirts", "Casual Shirts", "Jeans"],
     },
     {
       title: "Footwear",
-      items: ["Casual Shoes", "Sports Shoes", "Formal Shoes", "Sneakers", "Sandals & Floaters", "Flip Flops", "Socks"],
-    },
-    {
-      title: "Accessories",
-      items: ["Wallets", "Belts", "Perfumes & Body Mists", "Trimmers", "Deodorants", "Rings & Wristwear", "Helmets"],
+      items: ["Casual Shoes", "Sneakers"],
     },
   ],
+
   women: [
     {
-      title: "Indian & Fusion Wear",
-      items: ["Kurtas & Suits", "Kurtis & Tunics", "Sarees", "Ethnic Wear", "Leggings & Salwars", "Jackets & Shawls"],
-    },
-    {
       title: "Western Wear",
-      items: ["Dresses", "Tops", "T-Shirts", "Jeans", "Trousers & Capris", "Shorts & Skirts", "Shrugs", "Sweaters & Sweatshirts"],
+      items: ["Dresses", "Tops", "Jeans"],
     },
     {
       title: "Footwear",
-      items: ["Flats & Ballerinas", "Heels & Wedges", "Boots & Ankle Boots", "Sports Shoes & Sneakers", "Sandals"],
-    },
-    {
-      title: "Beauty & Personal Care",
-      items: ["Makeup Sets", "Skin Care", "Hair Care", "Fragrances", "Lipsticks", "Nail Polish"],
+      items: ["Heels", "Flats"],
     },
   ],
+
   kids: [
     {
       title: "Boys Clothing",
-      items: ["T-Shirts", "Shirts", "Shorts", "Jeans", "Trousers", "Ethnic Wear"],
-    },
-    {
-      title: "Girls Clothing",
-      items: ["Dresses & Jumpsuits", "Tops & Tees", "Lehenga Cholis", "Skirts & Shorts", "Tights & Leggings"],
-    },
-    {
-      title: "Footwear",
-      items: ["Casual Shoes", "Sports Shoes", "Sandals & Floaters", "School Shoes"],
-    },
-    {
-      title: "Infants",
-      items: ["Bodysuits", "Rompers", "Clothing Sets", "Infant Footwear", "Bibs"],
+      items: ["T-Shirts", "Jeans"],
     },
   ],
+
   home: [
     {
-      title: "Bed Linen & Furnishing",
-      items: ["Bedsheets", "Blankets & Quilts", "Pillows & Covers", "Curtains", "Rugs & Mats"],
-    },
-    {
-      title: "Bath & Dining",
-      items: ["Bath Towels", "Hand Towels", "Tablecloths", "Runners", "Aprons"],
-    },
-    {
       title: "Home Decor",
-      items: ["Wall Art", "Vases & Flowers", "Mirrors", "Candles & Diffusers", "Clocks"],
-    },
-    {
-      title: "Kitchen & Storage",
-      items: ["Cookware & Bakeware", "Storage Containers", "Lunchboxes & Bottles", "Organizers"],
+      items: ["Wall Art", "Mirrors"],
     },
   ],
+
   beauty: [
     {
       title: "Makeup",
-      items: ["Face Makeup", "Eyes", "Lips", "Nails", "Makeup Brushes & Tools"],
-    },
-    {
-      title: "Skin Care",
-      items: ["Cleansers & Toners", "Moisturizers & Serums", "Sunscreen", "Face Masks", "Eye Cream"],
-    },
-    {
-      title: "Hair Care",
-      items: ["Shampoo & Conditioner", "Hair Oils", "Styling Gels", "Hair Color", "Hair Tools"],
-    },
-    {
-      title: "Fragrances",
-      items: ["Men's Perfumes", "Women's Perfumes", "Body Mists & Sprays", "Deodorants"],
+      items: ["Face Makeup", "Lipsticks"],
     },
   ],
+
   genz: [
     {
-      title: "Women's Western Wear",
-      items: [
-        "Dresses Under Rs. 599",
-        "Tops Under Rs. 399",
-        "Jeans Under Rs. 599",
-        "Trousers Under Rs. 699",
-        "T-shirts Under Rs. 299",
-        "Shirts Under Rs. 499",
-        "Skirts Under Rs. 499",
-        "Shorts Under Rs. 699",
-        "Co-ords Under Rs. 799",
-        "Jumpsuits Under Rs. 899",
-        "Track pants Under Rs. 699",
-        "Jackets Under Rs. 899",
-        "Sweatshirts Under Rs. 699",
-        "Sweaters Under Rs. 899",
-      ],
-    },
-    {
-      title: "Women's Ethnic Wear",
-      items: [
-        "Kurtas Under Rs. 399",
-        "Kurtis Under Rs. 499",
-        "Kurta sets Under Rs. 499",
-        "Ethnic Dresses Under Rs. 999",
-        "Palazzos Under Rs. 799",
-      ],
-    },
-    {
-      title: "Lingerie & Loungewear",
-      items: [
-        "Bras Under Rs. 399",
-        "Night suits Under Rs. 799",
-        "Nightdresses Under Rs. 999",
-        "Lounge pants Under Rs. 999",
-        "Briefs Under Rs. 599",
-      ],
-    },
-    {
-      title: "Men's Casual Wear",
-      items: [
-        "T-shirts Under Rs. 299",
-        "Shirts Under Rs. 499",
-        "Jeans Under Rs. 599",
-        "Trousers Under Rs. 699",
-        "Shorts Under Rs. 599",
-        "Track pants Under Rs. 699",
-        "Jackets Under Rs. 899",
-        "Sweatshirts Under Rs. 699",
-        "Sweaters Under Rs. 999",
-        "Co-ords Under Rs. 999",
-      ],
-    },
-    {
-      title: "Men's Occasion Wear",
-      items: ["Kurtas Under Rs. 799", "Kurta Sets Under Rs. 999"],
-    },
-    {
-      title: "Women's Footwear",
-      items: [
-        "Heels Under Rs. 599",
-        "Flats Under Rs. 499",
-        "Casual shoes Under Rs. 699",
-        "Sports shoes Under Rs. 999",
-        "Flip flops Under Rs. 799",
-        "Boots Under Rs. 999",
-        "Ballerinas Under Rs. 799",
-      ],
-    },
-    {
-      title: "Men's Footwear",
-      items: [
-        "Casual shoes Under Rs. 799",
-        "Sports shoes Under Rs. 999",
-        "Formal shoes Under Rs. 999",
-        "Sandals Under Rs. 799",
-        "Flip flops Under Rs. 499",
-        "Boots Under Rs. 999",
-      ],
-    },
-    {
-      title: "Beauty & Grooming",
-      items: [
-        "Skincare Under Rs. 299",
-        "Haircare Under Rs. 399",
-        "Bath & Body Under Rs. 399",
-        "Makeup Under Rs. 299",
-        "Fragrances Under Rs. 399",
-        "Appliances Under Rs. 999",
-      ],
-    },
-    {
-      title: "Accessories",
-      items: [
-        "Jewellery Under Rs. 299",
-        "Handbags Under Rs. 499",
-        "Clutches Under Rs. 999",
-        "Backpacks Under Rs. 699",
-        "Wallets Under Rs. 499",
-        "Sunglasses Under Rs. 699",
-        "Belts Under Rs. 799",
-        "Caps Under Rs. 899",
-      ],
+      title: "Trending",
+      items: ["Dresses", "T-Shirts", "Sneakers"],
     },
   ],
 };
@@ -250,6 +111,16 @@ export function Header() {
       .catch(() => {});
   }, [API_URL]);
 
+  // Only these 6 nav categories - in this exact order
+  const ALLOWED_NAV = [
+    { key: "men",         label: "Men",         slug: "men" },
+    { key: "women",       label: "Women",       slug: "women" },
+    { key: "kids",        label: "Kids",        slug: "kids" },
+    { key: "home",        label: "Home",        slug: "home-living" },
+    { key: "beauty",      label: "Beauty",      slug: "beauty" },
+    { key: "genz",        label: "GenZ",        slug: "genz" },
+  ];
+
   React.useEffect(() => {
     fetch(`${API_URL}/api/v1/header`)
       .then((res) => {
@@ -257,15 +128,34 @@ export function Header() {
         return res.json();
       })
       .then((data) => {
-        if (data.navigation && data.navigation.length > 0) {
-          setNavItems(data.navigation);
-        } else {
-          // Fallback array structure
-          setNavItems(Object.keys(megaMenuData).map(k => ({ title: k, url: `/catalog/?category=${k}`, type: 'category' })));
-        }
+        // Build the 6 nav items from API navigation, filtered to ALLOWED_NAV only
+        const apiNav: any[] = data.navigation || [];
+        const filtered = ALLOWED_NAV.map(nav => {
+          // Find matching item from API by slug or title
+          const found = apiNav.find(
+            (n: any) =>
+              n.url?.toLowerCase().includes(nav.slug) ||
+              n.title?.toLowerCase().replace(/[^a-z]/g, "").includes(nav.key.replace(/[^a-z]/g, ""))
+          );
+          return {
+            title: nav.label,
+            url: `/catalog/?category=${nav.slug}`,
+            type: "category",
+            children: found?.children || [],
+            _key: nav.key,
+          };
+        });
+        setNavItems(filtered);
       })
       .catch(() => {
-        setNavItems(Object.keys(megaMenuData).map(k => ({ title: k, url: `/catalog/?category=${k}`, type: 'category' })));
+        // Fallback: just the 6 keys with no children (megaMenuData used as fallback in dropdown)
+        setNavItems(ALLOWED_NAV.map(nav => ({
+          title: nav.label,
+          url: `/catalog/?category=${nav.slug}`,
+          type: "category",
+          children: [],
+          _key: nav.key,
+        })));
       });
   }, [API_URL]);
 
@@ -288,18 +178,37 @@ export function Header() {
               <SheetContent side="left" className="w-[300px]">
                 <nav className="mt-8 flex flex-col gap-4">
                   {navItems.map((item) => (
-                    <Link
-                      key={item.title}
-                      href={getRelativePath(item.url)}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="text-sm font-bold uppercase tracking-wider text-foreground hover:text-[#f51c50]"
-                    >
-                      {item.title}
-                    </Link>
+                    <div key={item.title}>
+                      <Link
+                        href={getRelativePath(item.url)}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="text-sm font-black uppercase tracking-wider text-foreground hover:text-[#f51c50] transition-colors"
+                      >
+                        {item.title}
+                      </Link>
+                      {/* Mobile sub-items */}
+                      {(item.children?.length > 0 || megaMenuData[(item as any)._key ?? item.title.toLowerCase()]) && (
+                        <div className="ml-4 mt-2 flex flex-col gap-1.5">
+                          {(item.children?.length > 0
+                            ? item.children.slice(0, 3)
+                            : (megaMenuData[(item as any)._key ?? item.title.toLowerCase()] || []).slice(0, 3)
+                          ).map((col: any, ci: number) => (
+                            <div key={ci}>
+                              <span className="text-[10px] font-black uppercase text-[#f51c50] tracking-wide">
+                                {col.title}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   ))}
-                  <Link href={getRelativePath("/login")} onClick={() => setIsMobileMenuOpen(false)} className="text-sm font-bold uppercase tracking-wider">
-                    Login / Signup
-                  </Link>
+                  <div className="border-t border-zinc-100 pt-4 mt-2">
+                    <Link href={getRelativePath("/login")} onClick={() => setIsMobileMenuOpen(false)}
+                      className="text-sm font-black uppercase tracking-wider text-foreground hover:text-[#f51c50] transition-colors">
+                      Login / Signup
+                    </Link>
+                  </div>
                 </nav>
               </SheetContent>
             </Sheet>
@@ -506,69 +415,68 @@ export function Header() {
             </div>
             ) : (
               (() => {
-              const currentItem = navItems.find(item => item.title.toLowerCase() === activeMenu);
-              const dbChildren = currentItem?.children || [];
-              
-              if (dbChildren.length > 0) {
+                const menuKey = activeMenu ?? "";
+                const currentItem = navItems.find(i => i.title.toLowerCase() === menuKey);
+                // _key is the megaMenuData key (e.g. "home" maps to megaMenuData["home"])
+                const dataKey: string = (currentItem as any)?._key ?? menuKey;
+                const apiChildren: any[] = currentItem?.children || [];
+
+                // Build columns: use API children if available, else fall back to megaMenuData
+                const hasApiCols = apiChildren.length > 0 && apiChildren.some((c: any) => c.title);
+                const cols: MegaMenuColumn[] = hasApiCols
+                  ? apiChildren.map((c: any) => ({
+                      title: c.title,
+                      url:   c.url ?? `/catalog/?category=${encodeURIComponent((c.title ?? "").toLowerCase())}`,
+                      items: (c.items || c.children || [])
+                        .slice(0, 3)
+                        .map((s: any) =>
+                          typeof s === "string"
+                            ? {
+                                title: s,
+                                url: `/catalog/?category=${encodeURIComponent(s.toLowerCase())}`,
+                              }
+                            : {
+                                title: s.title,
+                                url:
+                                  s.url ??
+                                  `/catalog/?category=${encodeURIComponent(
+                                    (s.title ?? "").toLowerCase()
+                                  )}`,
+                              }
+                        ),
+                    }))
+                  : (megaMenuData[dataKey] || []).map(col => ({
+                      title: col.title,
+                      url:   `/catalog/?category=${encodeURIComponent(col.title.toLowerCase())}`,
+                      items: col.items.slice(0, 3).map(item => ({
+                        title: item,
+                        url:   `/catalog/?category=${encodeURIComponent(item.toLowerCase())}`,
+                      })),
+                    }));
+
+                if (!cols.length) return null;
+
+                const colClass = cols.length <= 3 ? "grid-cols-3" : cols.length === 4 ? "grid-cols-4" : "grid-cols-5";
+                const headColor = dataKey === "genz" ? "text-[#00a896]" : "text-[#f51c50]";
+
                 return (
                   <div className="mx-auto max-w-7xl px-8 py-8">
-                    <div className="grid grid-cols-5 gap-8">
-                      {dbChildren.map((col: any, idx: number) => (
+                    <div className={`grid ${colClass} gap-8`}>
+                      {cols.map((col, idx) => (
                         <div key={idx} className="flex flex-col gap-3">
-                          <h4 className="font-heading text-xs font-black uppercase tracking-wider text-[#f51c50]">
-                            {col.title}
-                          </h4>
+                          <Link href={getRelativePath(col.url)}>
+                            <h4 className={`font-heading text-xs font-black uppercase tracking-wider cursor-pointer hover:underline ${headColor}`}>
+                              {col.title}
+                            </h4>
+                          </Link>
                           <ul className="space-y-1.5">
-                            {col.items && col.items.length > 0 ? (
-                              col.items.map((subItem: any, subIdx: number) => (
-                                <li key={subIdx}>
-                                  <Link
-                                    href={getRelativePath(subItem.url)}
-                                    className="text-xs text-zinc-650 hover:text-black font-medium transition-colors"
-                                  >
-                                    {subItem.title}
-                                  </Link>
-                                </li>
-                              ))
-                            ) : (
-                              <li>
+                           {col.items.map((sub: MegaMenuItem, si: number) => (
+                              <li key={si}>
                                 <Link
-                                  href={getRelativePath(col.url)}
-                                  className="text-xs text-zinc-650 hover:text-black font-medium transition-colors"
+                                  href={getRelativePath(sub.url)}
+                                  className="text-xs text-zinc-600 hover:text-black font-medium transition-colors leading-relaxed"
                                 >
-                                  {col.title}
-                                </Link>
-                              </li>
-                            )}
-                          </ul>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              }
-              
-              if (megaMenuData[activeMenu]) {
-                return (
-                  <div className="mx-auto max-w-7xl px-8 py-8">
-                    <div className="grid grid-cols-5 gap-8">
-                      {megaMenuData[activeMenu]?.map((cat, idx) => (
-                        <div key={idx} className="flex flex-col gap-3">
-                          <h4
-                            className={`font-heading text-xs font-black uppercase tracking-wider ${
-                              activeMenu === "genz" ? "text-[#00a896]" : "text-[#f51c50]"
-                            }`}
-                          >
-                            {cat.title}
-                          </h4>
-                          <ul className="space-y-1.5">
-                            {cat.items.map((item, itemIdx) => (
-                              <li key={itemIdx}>
-                                <Link
-                                  href={getRelativePath(`/catalog/?category=${item.toLowerCase()}`)}
-                                  className="text-xs text-zinc-650 hover:text-black font-medium transition-colors"
-                                >
-                                  {item}
+                                  {sub.title}
                                 </Link>
                               </li>
                             ))}
@@ -578,9 +486,6 @@ export function Header() {
                     </div>
                   </div>
                 );
-              }
-              
-              return null;
               })()
             )}
         </div>

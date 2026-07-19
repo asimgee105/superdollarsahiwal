@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'core/router/app_router.dart';
+import 'core/theme/app_theme.dart';
 
 void main() {
   runApp(const MyApp());
@@ -9,17 +11,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Fashion Store',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
-        useMaterial3: true,
-      ),
-      home: const Scaffold(
-        body: Center(
-          child: Text('Fashion Store Mobile App Scaffolded'),
-        ),
-      ),
+    return MaterialApp.router(
+      title: 'AURA Store',
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      routerConfig: appRouter,
+      debugShowCheckedModeBanner: false,
     );
   }
 }
