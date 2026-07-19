@@ -9,7 +9,7 @@ class InsiderScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
-        title: const Text('AURA INSIDER CLUB'),
+        title: const Text('SUPER DOLLAR INSIDER CLUB'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.go('/profile'),

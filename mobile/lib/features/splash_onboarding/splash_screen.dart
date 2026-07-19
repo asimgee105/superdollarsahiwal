@@ -34,16 +34,13 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     // Artificial delay for splash animation
     await Future.delayed(const Duration(seconds: 2));
 
-    final token = await _storage.read(key: 'auth_token');
     final onboardingDone = HiveStorage.settings.get('onboarding_done', defaultValue: false);
 
     if (mounted) {
-      if (token != null) {
-        context.go('/home');
-      } else if (!onboardingDone) {
+      if (!onboardingDone) {
         context.go('/onboarding');
       } else {
-        context.go('/login');
+        context.go('/home');
       }
     }
   }
@@ -80,7 +77,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 ),
                 child: const Center(
                   child: Text(
-                    'A',
+                    'S',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 48,
@@ -91,12 +88,12 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               ),
               const SizedBox(height: 24),
               const Text(
-                'A U R A',
+                'SUPER DOLLAR',
                 style: TextStyle(
                   color: Color(0xFFFF3F6C),
                   fontSize: 22,
                   fontWeight: FontWeight.w900,
-                  letterSpacing: 6.0,
+                  letterSpacing: 2.0,
                 ),
               ),
             ],

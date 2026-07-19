@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../../core/storage/hive_storage.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -17,13 +18,13 @@ class _CartScreenState extends State<CartScreen> {
 
   void _applyCoupon() {
     final code = _couponController.text.trim().toUpperCase();
-    if (code == 'AURA20') {
+    if (code == 'SD20') {
       setState(() {
         _discount = 0.20; // 20% discount
         _activeCoupon = code;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Coupon AURA20 applied! 20% discount added.')),
+        const SnackBar(content: Text('Coupon SD20 applied! 20% discount added.')),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -253,7 +254,7 @@ class _CartScreenState extends State<CartScreen> {
                             child: TextField(
                               controller: _couponController,
                               decoration: InputDecoration(
-                                hintText: 'Enter coupon code (e.g. AURA20)',
+                                hintText: 'Enter coupon code (e.g. SD20)',
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                               ),
@@ -336,7 +337,22 @@ class _CartScreenState extends State<CartScreen> {
                     const SizedBox(height: 18),
 
                     ElevatedButton(
-                      onPressed: () => context.go('/checkout'),
+                      onPressed: () async {
+                        const storage = FlutterSecureStorage();
+                        final token = await storage.read(key: 'auth_token');
+                        if (token == null) {
+                          if (mounted) {
+                            context.go('/login');
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Please login to proceed to checkout.')),
+                            );
+                          }
+                        } else {
+                          if (mounted) {
+                            context.go('/checkout');
+                          }
+                        }
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFFF3F6C),
                         foregroundColor: Colors.white,

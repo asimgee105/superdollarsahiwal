@@ -71,7 +71,7 @@ class _GiftCardsScreenState extends State<GiftCardsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('AURA GIFT CARD', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 14, letterSpacing: 1.0)),
+                  Text('SUPER DOLLAR GIFT CARD', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 14, letterSpacing: 1.0)),
                   SizedBox(height: 6),
                   Text('Share the joy of style. The perfect gift voucher for birthdays, anniversaries, or appreciation tokens.', style: TextStyle(color: Colors.white70, fontSize: 10, height: 1.4)),
                 ],

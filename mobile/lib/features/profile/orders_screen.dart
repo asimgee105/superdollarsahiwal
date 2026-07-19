@@ -12,8 +12,8 @@ class OrdersScreen extends StatelessWidget {
       'total': '4,500',
       'items': [
         {
-          'title': 'Aura Premium Cotton Kurta Set',
-          'brand': 'AURA PREMIUM',
+          'title': 'Premium Cotton Kurta Set',
+          'brand': 'SD PREMIUM',
           'image': 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=150&auto=format&fit=crop'
         }
       ]
@@ -26,7 +26,7 @@ class OrdersScreen extends StatelessWidget {
       'items': [
         {
           'title': 'Slim Fit Casual Denim Jeans',
-          'brand': 'AURA MEN',
+          'brand': 'SD MEN',
           'image': 'https://images.unsplash.com/photo-1542272604-787c3835535d?q=80&w=150&auto=format&fit=crop'
         }
       ]

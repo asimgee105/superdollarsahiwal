@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../../core/storage/hive_storage.dart';
@@ -20,14 +21,27 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   // Mock details matching static products
   final Map<String, dynamic> _mockDetails = {
-    'title': 'Aura Premium Cotton Kurta Set',
-    'brand': 'AURA PREMIUM',
+    'title': 'Premium Cotton Kurta Set',
+    'brand': 'SD PREMIUM',
     'price': 4500,
     'image': 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=400&auto=format&fit=crop',
     'description': 'This premium ethnic wear set features a high-density cotton weave design with detailed embroidery along the collar, paired with straight trousers for optimal everyday wear.',
   };
 
-  void _handleAddToBag() {
+  void _handleAddToBag() async {
+    const storage = FlutterSecureStorage();
+    final token = await storage.read(key: 'auth_token');
+
+    if (token == null) {
+      if (mounted) {
+        context.go('/login');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please login to add items to your shopping bag.')),
+        );
+      }
+      return;
+    }
+
     final cartBox = HiveStorage.cart;
     final id = widget.productId.toString();
     

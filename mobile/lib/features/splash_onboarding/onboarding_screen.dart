@@ -21,7 +21,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     },
     {
       'title': 'EXCLUSIVE INSIDER REWARDS',
-      'subtitle': 'Join the Aura Insider loyalty program, accumulate shopping points, and exchange them for coupons.',
+      'subtitle': 'Join the Super Dollar Insider loyalty program, accumulate shopping points, and exchange them for coupons.',
       'image': 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=600&auto=format&fit=crop'
     },
     {

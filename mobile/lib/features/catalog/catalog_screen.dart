@@ -15,30 +15,30 @@ class _CatalogScreenState extends State<CatalogScreen> {
   final List<Map<String, String>> _products = [
     {
       'id': '1',
-      'title': 'Aura Premium Cotton Kurta Set',
+      'title': 'Premium Cotton Kurta Set',
       'price': '4,500',
-      'brand': 'AURA PREMIUM',
+      'brand': 'SD PREMIUM',
       'image': 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=300&auto=format&fit=crop'
     },
     {
       'id': '2',
       'title': 'Slim Fit Casual Denim Jeans',
       'price': '2,200',
-      'brand': 'AURA MEN',
+      'brand': 'SD MEN',
       'image': 'https://images.unsplash.com/photo-1542272604-787c3835535d?q=80&w=300&auto=format&fit=crop'
     },
     {
       'id': '3',
       'title': 'Women Printed Ethnic A-Line Kurti',
       'price': '1,850',
-      'brand': 'AURA FUSION',
+      'brand': 'SD FUSION',
       'image': 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=300&auto=format&fit=crop'
     },
     {
       'id': '4',
-      'title': 'Aura Sporty Running Shoes',
+      'title': 'Sporty Running Shoes',
       'price': '3,999',
-      'brand': 'AURA ACTIVE',
+      'brand': 'SD ACTIVE',
       'image': 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=300&auto=format&fit=crop'
     }
   ];
