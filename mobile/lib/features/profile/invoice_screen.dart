@@ -105,8 +105,8 @@ class InvoiceScreen extends StatelessWidget {
               const Row(
                 children: [
                   Expanded(flex: 6, child: Text('ITEM DESCRIPTION', style: TextStyle(fontSize: 8, fontWeight: FontWeight.w900, color: Colors.grey))),
-                  Expanded(flex: 2, child: Text('QTY', style: TextStyle(fontSize: 8, fontWeight: FontWeight.w900, color: Colors.grey, textAlign: Alignment.centerRight))),
-                  Expanded(flex: 2, child: Text('TOTAL', style: TextStyle(fontSize: 8, fontWeight: FontWeight.w900, color: Colors.grey, textAlign: Alignment.centerRight))),
+                  Expanded(flex: 2, child: Text('QTY', style: TextStyle(fontSize: 8, fontWeight: FontWeight.w900, color: Colors.grey), textAlign: TextAlign.right)),
+                  Expanded(flex: 2, child: Text('TOTAL', style: TextStyle(fontSize: 8, fontWeight: FontWeight.w900, color: Colors.grey), textAlign: TextAlign.right)),
                 ],
               ),
               const Divider(height: 16),

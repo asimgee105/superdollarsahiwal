@@ -35,7 +35,7 @@ class _LiveChatScreenState extends State<LiveChatScreen> {
     });
 
     // Simulate Agent response
-    Future.delayed(const Duration(seconds: 1.5), () {
+    Future.delayed(const Duration(milliseconds: 1500), () {
       if (mounted) {
         setState(() {
           _agentTyping = false;

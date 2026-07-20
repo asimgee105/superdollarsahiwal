@@ -35,7 +35,7 @@ class _AIShoppingAssistantState extends State<AIShoppingAssistant> {
     });
 
     // Simulate AI response logic
-    Future.delayed(const Duration(seconds: 1.5), () {
+    Future.delayed(const Duration(milliseconds: 1500), () {
       if (mounted) {
         String aiResponse = 'I can help you matching styles. For cotton kurta sets, I suggest pairing them with white leather sandals and ethnic pajama pants.';
         
