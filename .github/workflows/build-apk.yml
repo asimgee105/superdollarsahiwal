@@ -31,6 +31,16 @@ jobs:
           cd mobile
           flutter create --platforms=android,ios --org com.fashion.aura .
 
+      - name: Update Android SDK versions to 34
+        run: |
+          cd mobile/android
+          echo "flutter.compileSdkVersion=34" >> local.properties
+          echo "flutter.targetSdkVersion=34" >> local.properties
+          sed -i 's/compileSdkVersion flutter.compileSdkVersion/compileSdkVersion 34/g' app/build.gradle || true
+          sed -i 's/compileSdk flutter.compileSdkVersion/compileSdk 34/g' app/build.gradle || true
+          sed -i 's/targetSdkVersion flutter.targetSdkVersion/targetSdkVersion 34/g' app/build.gradle || true
+          sed -i 's/targetSdk flutter.targetSdkVersion/targetSdk 34/g' app/build.gradle || true
+
       - name: Install Dependencies
         run: |
           cd mobile
