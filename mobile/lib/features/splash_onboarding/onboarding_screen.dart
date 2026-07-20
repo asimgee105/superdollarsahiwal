@@ -33,7 +33,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   void _finishOnboarding() {
     HiveStorage.settings.put('onboarding_done', true);
-    context.go('/login');
+    context.go('/home');
   }
 
   @override
