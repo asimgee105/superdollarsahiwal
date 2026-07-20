@@ -15,60 +15,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   bool _isPlacingOrder = false;
 
   void _handlePlaceOrder() {
-    setState(() => _isPlacingOrder = true);
-    
-    // Simulate placing order with API
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        setState(() => _isPlacingOrder = false);
-        
-        // Clear local cached cart
-        HiveStorage.cart.clear();
+    double subtotal = 0.0;
+    final items = HiveStorage.cart.values.toList();
+    for (var item in items) {
+      final price = (item['price'] as num?)?.toDouble() ?? 0.0;
+      final qty = (item['quantity'] as num?)?.toInt() ?? 1;
+      subtotal += (price * qty);
+    }
+    final total = subtotal + 150.0; // Rs. 150 shipping
 
-        // Show premium success dialog
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              title: const Text(
-                'ORDER PLACED!',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 1.0),
-              ),
-              content: const Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.check_circle_outline, color: Colors.green, size: 64),
-                  SizedBox(height: 16),
-                  Text(
-                    'Your order ODR-849102 has been successfully placed. You will receive an email confirmation shortly.',
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.grey, height: 1.5),
-                    textAlign: TextAlign.center,
-                  )
-                ],
-              ),
-              actions: [
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context); // Pop dialog
-                      context.go('/orders'); // Route to orders history
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFF3F6C),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    child: const Text('VIEW ORDERS', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900)),
-                  ),
-                )
-              ],
-            );
-          },
-        );
-      }
+    context.go('/payment-processing', extra: {
+      'amount': total,
+      'method': _selectedPaymentMethod,
     });
   }
 
@@ -175,7 +133,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 12),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton.icon(
+                      onPressed: () => context.go('/address-book?select=true'),
+                      icon: const Icon(Icons.import_contacts_outlined, size: 14, color: Color(0xFFFF3F6C)),
+                      label: const Text('MANAGE ADDRESS BOOK', style: TextStyle(color: Color(0xFFFF3F6C), fontSize: 9, fontWeight: FontWeight.w900)),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
 
                   // Payment Section
                   const Text(

@@ -35,12 +35,15 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     await Future.delayed(const Duration(seconds: 2));
 
     final onboardingDone = HiveStorage.settings.get('onboarding_done', defaultValue: false);
+    final configsSelected = HiveStorage.settings.get('configs_selected', defaultValue: false);
 
     if (mounted) {
       if (!onboardingDone) {
         context.go('/onboarding');
+      } else if (!configsSelected) {
+        context.go('/preferences');
       } else {
-        context.go('/home');
+        context.go('/welcome');
       }
     }
   }
