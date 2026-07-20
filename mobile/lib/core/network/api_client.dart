@@ -6,7 +6,7 @@ class ApiClient {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   // Map to Android localhost mapping (10.0.2.2) so it works on both emulator & iOS
-  static const String baseUrl = 'http://10.0.2.2:8000';
+  static const String baseUrl = 'http://api.superdollarsahiwal.com';
 
   ApiClient()
       : _dio = Dio(BaseOptions(

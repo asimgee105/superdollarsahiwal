@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../../core/storage/hive_storage.dart';
+import '../../core/network/api_client.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final int productId;
@@ -13,11 +14,13 @@ class ProductDetailScreen extends StatefulWidget {
 }
 
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
+  final ApiClient _apiClient = ApiClient();
   final List<String> _sizes = ['S', 'M', 'L', 'XL'];
   final List<Color> _colors = [Colors.red, Colors.blue, Colors.black, Colors.indigo];
 
   String _selectedSize = 'M';
   Color _selectedColor = Colors.black;
+  bool _isLoading = true;
 
   // Mock details matching static products
   final Map<String, dynamic> _mockDetails = {
@@ -27,6 +30,33 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     'image': 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=400&auto=format&fit=crop',
     'description': 'This premium ethnic wear set features a high-density cotton weave design with detailed embroidery along the collar, paired with straight trousers for optimal everyday wear.',
   };
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchDetails();
+  }
+
+  Future<void> _fetchDetails() async {
+    try {
+      final res = await _apiClient.get('/api/v1/products/${widget.productId}');
+      if (res.statusCode == 200 && res.data['data'] != null) {
+        final data = res.data['data'];
+        setState(() {
+          _mockDetails['title'] = data['title'] ?? data['name'] ?? _mockDetails['title'];
+          _mockDetails['brand'] = data['brand'] ?? _mockDetails['brand'];
+          _mockDetails['price'] = data['price'] != null ? (data['price'] as num).toInt() : _mockDetails['price'];
+          _mockDetails['image'] = data['image'] ?? _mockDetails['image'];
+          _mockDetails['description'] = data['description'] ?? _mockDetails['description'];
+          _isLoading = false;
+        });
+      } else {
+        setState(() => _isLoading = false);
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+    }
+  }
 
   void _handleAddToBag() async {
     const storage = FlutterSecureStorage();
@@ -74,54 +104,45 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   void _handleToggleWishlist() {
-    final wishlistBox = HiveStorage.wishlist;
+    final wishlist = HiveStorage.wishlist;
     final id = widget.productId.toString();
-
-    if (wishlistBox.containsKey(id)) {
-      wishlistBox.delete(id);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Removed from wishlist.')),
-      );
-    } else {
-      wishlistBox.put(id, {
-        'id': id,
-        'title': _mockDetails['title'],
-        'brand': _mockDetails['brand'],
-        'price': _mockDetails['price'],
-        'image': _mockDetails['image'],
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Saved to wishlist!')),
-      );
-    }
+    final inWishlist = wishlist.get(id, defaultValue: false);
+    
+    wishlist.put(id, !inWishlist);
     setState(() {});
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(!inWishlist ? 'Added to wishlist!' : 'Removed from wishlist!'),
+        duration: const Duration(seconds: 1),
+      ),
+    );
   }
 
-  void _showAiSummary() {
+  void _showAIAssistant() {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) {
-        return Container(
-          padding: const EdgeInsets.all(24),
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            top: 24,
+            left: 20,
+            right: 20,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Row(
+              const Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFF3F6C).withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.psychology, color: Color(0xFFFF3F6C), size: 24),
-                  ),
-                  const SizedBox(width: 12),
-                  const Text(
+                  Icon(Icons.auto_awesome, color: Color(0xFFFF3F6C)),
+                  SizedBox(width: 8),
+                  Text(
                     'AI PRODUCT INSIGHTS',
                     style: TextStyle(
                       fontSize: 12,
@@ -131,26 +152,24 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 16),
               const Text(
-                'Based on 124 customer reviews, this product is highly praised for its premium quality cotton fabric and embroidery workmanship. 94% of buyers reported the sizing fits exactly as expected. Ideal for hot summer days due to its airy weave.',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  height: 1.6,
-                  color: Colors.black87,
-                ),
+                '• Sizing Advice: Fits true to size. If you prefer a loose look, order one size up.\n'
+                '• Care Guidelines: Cold machine wash. Warm iron inside out.\n'
+                '• Style Tips: Style this Kurta with white straight pants and leather sandals.',
+                style: TextStyle(fontSize: 11, height: 1.6, color: Colors.black87),
               ),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF3F6C),
+                  backgroundColor: Colors.black,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 ),
-                child: const Text('GOT IT', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900)),
-              )
+                child: const Text('DISMISS', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+              ),
+              const SizedBox(height: 24),
             ],
           ),
         );
@@ -160,182 +179,200 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final inWishlist = HiveStorage.wishlist.containsKey(widget.productId.toString());
+    final id = widget.productId.toString();
+    final inWishlist = HiveStorage.wishlist.get(id, defaultValue: false);
+    final themeColor = const Color(0xFFFF3F6C);
 
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('PRODUCT DETAILS'),
+        backgroundColor: Colors.white,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => context.go('/catalog'),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.share_outlined, color: Colors.black),
+            onPressed: () {},
+          ),
+        ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            
-            // Image Carousel Container
-            Container(
-              height: 380,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: NetworkImage(_mockDetails['image']!),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-
-            Padding(
-              padding: const EdgeInsets.all(16.0),
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(themeColor)))
+          : SingleChildScrollView(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  
-                  // Brand & AI insights row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        _mockDetails['brand']!,
-                        style: const TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w900,
-                          color: Color(0xFFFF3F6C),
-                          letterSpacing: 1.5,
-                        ),
+                  // Product Banner Image
+                  Container(
+                    height: 400,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: NetworkImage(_mockDetails['image']),
+                        fit: BoxFit.cover,
                       ),
-                      GestureDetector(
-                        onTap: _showAiSummary,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFF3F6C).withOpacity(0.06),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: const Color(0xFFFF3F6C).withOpacity(0.2)),
-                          ),
-                          child: const Row(
-                            children: [
-                              Icon(Icons.psychology, size: 14, color: Color(0xFFFF3F6C)),
-                              SizedBox(width: 4),
-                              Text(
-                                'AI Summary',
-                                style: TextStyle(
-                                  fontSize: 8,
-                                  fontWeight: FontWeight.w900,
-                                  color: Color(0xFFFF3F6C),
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-
-                  // Title
-                  Text(
-                    _mockDetails['title']!,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Price
-                  Text(
-                    'Rs. ${_mockDetails['price'].toString()}',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.black,
                     ),
                   ),
                   const SizedBox(height: 18),
 
-                  // Size selection
-                  const Text(
-                    'SELECT SIZE',
-                    style: TextStyle(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.grey,
-                      letterSpacing: 1.0,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: _sizes.map((sz) {
-                      final selected = _selectedSize == sz;
-                      return GestureDetector(
-                        onTap: () => setState(() => _selectedSize = sz),
-                        child: Container(
-                          margin: const EdgeInsets.only(right: 12),
-                          width: 42,
-                          height: 42,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: selected ? const Color(0xFFFF3F6C) : Colors.grey.shade300,
-                              width: 1.5,
-                            ),
-                            shape: BoxShape.circle,
-                            color: selected ? const Color(0xFFFF3F6C).withOpacity(0.04) : Colors.transparent,
-                          ),
-                          child: Center(
-                            child: Text(
-                              sz,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Brand & AI insights row
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              _mockDetails['brand']!.toUpperCase(),
                               style: TextStyle(
-                                fontSize: 11,
+                                fontSize: 10,
                                 fontWeight: FontWeight.w900,
-                                color: selected ? const Color(0xFFFF3F6C) : Colors.black87,
+                                color: themeColor,
+                                letterSpacing: 1.5,
                               ),
                             ),
+                            TextButton.icon(
+                              onPressed: _showAIAssistant,
+                              icon: Icon(Icons.auto_awesome, size: 14, color: themeColor),
+                              label: Text(
+                                'AI INSIGHTS',
+                                style: TextStyle(color: themeColor, fontSize: 9, fontWeight: FontWeight.bold),
+                              ),
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                            )
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          _mockDetails['title']!,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
                           ),
                         ),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 24),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Rs. ${_mockDetails['price'].toString()}',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.black,
+                          ),
+                        ),
+                        const Divider(height: 32),
 
-                  // Description details
-                  const Text(
-                    'PRODUCT DESCRIPTION',
-                    style: TextStyle(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.grey,
-                      letterSpacing: 1.0,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    _mockDetails['description']!,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      height: 1.6,
-                      color: Colors.black54,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
+                        // Select size
+                        const Text(
+                          'SELECT SIZE',
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.grey,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: _sizes.map((size) {
+                            final isSel = _selectedSize == size;
+                            return GestureDetector(
+                              onTap: () => setState(() => _selectedSize = size),
+                              child: Container(
+                                margin: const EdgeInsets.only(right: 12),
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: isSel ? themeColor : Colors.white,
+                                  border: Border.all(color: isSel ? themeColor : Colors.grey.shade300),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    size,
+                                    style: TextStyle(
+                                      color: isSel ? Colors.white : Colors.black,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                        const Divider(height: 32),
 
+                        // Colors Selection
+                        const Text(
+                          'SELECT COLOR',
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.grey,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: _colors.map((color) {
+                            final isSel = _selectedColor == color;
+                            return GestureDetector(
+                              onTap: () => setState(() => _selectedColor = color),
+                              child: Container(
+                                margin: const EdgeInsets.only(right: 12),
+                                width: 32,
+                                height: 32,
+                                decoration: BoxDecoration(
+                                  color: color,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: isSel ? Colors.grey.shade900 : Colors.transparent,
+                                    width: 2.5,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                        const Divider(height: 32),
+
+                        // Description
+                        const Text(
+                          'PRODUCT DESCRIPTION',
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.grey,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          _mockDetails['description']!,
+                          style: const TextStyle(fontSize: 11, height: 1.6, color: Colors.black54),
+                        ),
+                        const SizedBox(height: 40),
+
+                      ],
+                    ),
+                  )
                 ],
               ),
-            )
-
-          ],
-        ),
-      ),
+            ),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border(top: BorderSide(color: Colors.grey.shade200)),
+          border: Border(top: BorderSide(color: Colors.grey.shade100)),
         ),
         child: Row(
           children: [
@@ -345,7 +382,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 onPressed: _handleToggleWishlist,
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(
-                    color: inWishlist ? const Color(0xFFFF3F6C) : Colors.grey.shade300,
+                    color: inWishlist ? themeColor : Colors.grey.shade300,
                     width: 1.5,
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 16),
@@ -353,7 +390,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 ),
                 child: Icon(
                   inWishlist ? Icons.favorite : Icons.favorite_border,
-                  color: inWishlist ? const Color(0xFFFF3F6C) : Colors.grey,
+                  color: inWishlist ? themeColor : Colors.grey,
                 ),
               ),
             ),
@@ -363,7 +400,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               child: ElevatedButton(
                 onPressed: _handleAddToBag,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF3F6C),
+                  backgroundColor: themeColor,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
